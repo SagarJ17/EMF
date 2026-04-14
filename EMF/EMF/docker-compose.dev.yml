@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: emf_db_dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: emf_fitness
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: emf_backend_dev
+    user: root
+    command: bash -c "pip install --no-cache-dir -r requirements.txt && uvicorn main:app --reload --host 0.0.0.0 --port 8000 --proxy-headers"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/emf_fitness
+      - ALLOWED_ORIGINS=["http://localhost:3000"]
+      - SECRET_KEY=emf-fitness-secret-key-change-in-production
+      - WHATSAPP_NUMBER=+919876543210
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: deps
+    container_name: emf_frontend_dev
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    container_name: emf_minio_dev
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data_dev:/data
+
+volumes:
+  postgres_data_dev:
+  minio_data_dev:
