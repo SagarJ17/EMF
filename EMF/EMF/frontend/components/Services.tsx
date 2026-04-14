@@ -62,11 +62,11 @@ const DEFAULT_SERVICES = [
 export default function Services() {
   const { getSetting, loading } = useCMSStore();
   const servicesStr = getSetting("services_cards", "");
-  
+
   let activeServices = DEFAULT_SERVICES;
   try {
     if (servicesStr) activeServices = JSON.parse(servicesStr);
-  } catch (e) {}
+  } catch (e) { }
 
   return (
     <section id="services" style={{ background: "white", padding: "80px 0" }}>
@@ -88,9 +88,9 @@ export default function Services() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }} className="services-grid">
           {loading ? (
-             Array(5).fill(0).map((_, i) => (
-                <div key={i} className="card skeleton" style={{ height: 320, borderRadius: 24 }} />
-             ))
+            Array(5).fill(0).map((_, i) => (
+              <div key={i} className="card skeleton" style={{ height: 320, borderRadius: 24 }} />
+            ))
           ) : activeServices.map((service: any, i: number) => (
             <motion.div
               key={service.title}
@@ -140,7 +140,7 @@ export default function Services() {
               <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7, marginBottom: 20 }}>{service.desc}</p>
 
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px" }}>
-                {service.features.map((f) => (
+                {service.features.map((f: string) => (
                   <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 13, color: "#3d3d3d", fontWeight: 500 }}>
                     <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#e8450a", flexShrink: 0 }} />
                     {f}
