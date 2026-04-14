@@ -15,7 +15,7 @@ const transformations = [
     quote: "Changed my life completely.",
   },
   {
-    before: "https://images.unsplash.com/photo-1609899537878-48715235bbf0?w=400&h=500&fit=crop",
+    before: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=500&fit=crop",
     after: "https://images.unsplash.com/photo-1579758629938-03607ccdbaba?w=400&h=500&fit=crop",
     name: "Priya M.",
     result: "-8 kg + toned",
@@ -71,7 +71,7 @@ export default function Transformations() {
            setData(formatted);
          }
       })
-      .catch(console.error)
+      .catch(() => { /* silently fallback to static data */ })
       .finally(() => setLoading(false));
   }, []);
 
@@ -133,7 +133,7 @@ export default function Transformations() {
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", position: "relative" }}>
                   <div style={{ position: "relative", aspectRatio: "4/5", background: "#111827" }}>
-                    <Image src={t.before!} alt={`Before - ${t.name}`} fill style={{ objectFit: "contain" }} unoptimized={t.before?.includes("localhost") || t.before?.includes("127.0.0.1")} priority={i < 2} />
+                    <Image src={t.before!} alt={`Before - ${t.name}`} fill sizes="(max-width: 768px) 50vw, 200px" style={{ objectFit: "contain" }} unoptimized={t.before?.includes("localhost") || t.before?.includes("127.0.0.1")} priority={i < 2} />
                     <div style={{
                       position: "absolute", top: 8, left: 8,
                       background: "rgba(0,0,0,0.7)", color: "white",
@@ -142,7 +142,7 @@ export default function Transformations() {
                     }}>BEFORE</div>
                   </div>
                   <div style={{ position: "relative", aspectRatio: "4/5", background: "#111827" }}>
-                    <Image src={t.after!} alt={`After - ${t.name}`} fill style={{ objectFit: "contain" }} unoptimized={t.after?.includes("localhost") || t.after?.includes("127.0.0.1")} priority={i < 2} />
+                    <Image src={t.after!} alt={`After - ${t.name}`} fill sizes="(max-width: 768px) 50vw, 200px" style={{ objectFit: "contain" }} unoptimized={t.after?.includes("localhost") || t.after?.includes("127.0.0.1")} priority={i < 2} />
                     <div style={{
                       position: "absolute", top: 8, right: 8,
                       background: "#e8450a", color: "white",

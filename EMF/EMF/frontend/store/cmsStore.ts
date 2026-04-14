@@ -17,7 +17,7 @@ export const useCMSStore = create<CMSState>((set, get) => ({
       const data = await res.json();
       set({ settings: data || {}, loading: false });
     } catch (e) {
-      console.error("CMS Load Failed", e);
+      // Backend not running, fallback to static defaults without error
       set({ loading: false });
     }
   },
