@@ -2,7 +2,7 @@
 
 export default function WhatsAppButton() {
   const waUrl =
-    "https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness";
+    "https://wa.me/917977345243?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness";
 
   return (
     <a
