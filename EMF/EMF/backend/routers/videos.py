@@ -57,7 +57,7 @@ async def get_videos(db: AsyncSession = Depends(get_db)):
         for v in SEED_VIDEOS:
             video = Video(**v)
             db.add(video)
-        await db.flush()
+        await db.commit()
         result = await db.execute(select(Video).order_by(Video.id))
         videos = result.scalars().all()
 

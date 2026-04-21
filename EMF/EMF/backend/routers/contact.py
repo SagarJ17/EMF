@@ -19,12 +19,12 @@ async def create_contact(
 ):
     msg = ContactMessage(
         name=payload.name.strip(),
-        email=payload.email.lower().strip(),
-        phone=payload.phone,
-        message=payload.message.strip(),
+        phone=payload.phone.strip(),
+        email=payload.email.lower().strip() if payload.email else None,
+        message=payload.message.strip() if payload.message else None,
     )
     db.add(msg)
-    await db.flush()
+    await db.commit()
 
     return ContactResponse(
         success=True,

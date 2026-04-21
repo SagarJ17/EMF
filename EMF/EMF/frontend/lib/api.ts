@@ -61,9 +61,9 @@ export const submitBooking = (data: BookingPayload) =>
 // ─── Contact ───────────────────────────────────────────────────────────────────
 export interface ContactPayload {
   name: string;
-  email: string;
-  phone?: string;
-  message: string;
+  phone: string;
+  email?: string;
+  message?: string;
 }
 
 export interface ContactResponse {

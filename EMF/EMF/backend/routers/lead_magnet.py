@@ -23,7 +23,7 @@ async def create_lead(
         goal=payload.goal,
     )
     db.add(lead)
-    await db.flush()
+    await db.commit()
     await db.refresh(lead)
 
     return LeadMagnetResponse(

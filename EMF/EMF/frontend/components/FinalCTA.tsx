@@ -45,7 +45,7 @@ export default function FinalCTA() {
             Start Your Fitness Journey Today
           </h2>
           <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 18, lineHeight: 1.7, marginBottom: 44, maxWidth: 560, margin: "0 auto 44px" }}>
-            Over 200 people have already transformed their bodies with EMF Fitness. 
+            Over 200 people have already transformed their bodies with EMF Fitness.
             Your first session is completely free — no commitment, no risk.
           </p>
 
@@ -68,7 +68,7 @@ export default function FinalCTA() {
             </motion.a>
 
             <motion.a
-              href="https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness"
+              href="https://wa.me/919819406259?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.04 }}

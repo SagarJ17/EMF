@@ -12,10 +12,10 @@ export default function Footer() {
   return (
     <footer style={{ background: "#0f0f0f", padding: "60px 0 32px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        
+
         {/* Top row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: 40, marginBottom: 48 }} className="footer-grid">
-          
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 40, marginBottom: 48 }} className="footer-grid">
+
           {/* Brand */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
@@ -34,8 +34,13 @@ export default function Footer() {
               </div>
             </div>
             <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7, maxWidth: 260, marginBottom: 20 }}>
-              {getSetting("footer_blurb", "Elite personal training at home and online. Transforming lives one session at a time.")}
+              {getSetting("footer_blurb", "Experience high-end personal training crafted around you, session by session.")}
             </p>
+          </div>
+
+          {/* Links */}
+          <div style={{ marginLeft: "auto" }} className="socials-col">
+            <h5 style={{ fontFamily: "Outfit", fontWeight: 700, color: "white", fontSize: 14, marginBottom: 16, letterSpacing: "0.04em" }}>SOCIALS</h5>
             <div style={{ display: "flex", gap: 12 }}>
               <a href={getSetting("social_instagram", "https://instagram.com")} target="_blank" aria-label="Instagram" style={{
                 width: 38, height: 38, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
@@ -51,7 +56,7 @@ export default function Footer() {
               }} onMouseEnter={(e) => { e.currentTarget.style.color = "#e8450a"; e.currentTarget.style.borderColor = "rgba(232,69,10,0.3)"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#6b7280"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
                 <Youtube size={17} />
               </a>
-              <a href={getSetting("social_whatsapp", "https://wa.me/something")} target="_blank" aria-label="WhatsApp" style={{
+              <a href={`https://wa.me/${getSetting("whatsapp_number", "919819406259")}`} target="_blank" aria-label="WhatsApp" style={{
                 width: 38, height: 38, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", transition: "all 0.2s", color: "#6b7280", textDecoration: "none"
@@ -63,52 +68,21 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Links */}
-          <div>
-            <h5 style={{ fontFamily: "Outfit", fontWeight: 700, color: "white", fontSize: 14, marginBottom: 16, letterSpacing: "0.04em" }}>SERVICES</h5>
-            {["Home Training", "Online Coaching", "Fat Loss", "Strength Training", "Mobility"].map((link) => (
-              <a key={link} href="#services" style={{ display: "block", color: "#6b7280", fontSize: 14, marginBottom: 10, textDecoration: "none", transition: "color 0.2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8450a")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-              >
-                {link}
-              </a>
-            ))}
-          </div>
-
-          <div>
-            <h5 style={{ fontFamily: "Outfit", fontWeight: 700, color: "white", fontSize: 14, marginBottom: 16, letterSpacing: "0.04em" }}>TOOLS</h5>
-            {["BMI Calculator", "Free Diet Plan", "Book Session", "Reviews"].map((link) => (
-              <a key={link} href={`#${link.toLowerCase().replace(/ /g, "-")}`} style={{ display: "block", color: "#6b7280", fontSize: 14, marginBottom: 10, textDecoration: "none", transition: "color 0.2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8450a")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-              >
-                {link}
-              </a>
-            ))}
-          </div>
-
-          <div>
+          <div style={{ marginLeft: "auto" }} className="contact-col">
             <h5 style={{ fontFamily: "Outfit", fontWeight: 700, color: "white", fontSize: 14, marginBottom: 16, letterSpacing: "0.04em" }}>CONTACT</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <a href="tel:+919876543210" style={{ display: "flex", gap: 10, alignItems: "center", color: "#6b7280", fontSize: 14, textDecoration: "none", transition: "color 0.2s" }}
+              <a href={`tel:${getSetting("contact_phone", "+91 9819406259")}`} style={{ display: "flex", gap: 10, alignItems: "center", color: "#6b7280", fontSize: 14, textDecoration: "none", transition: "color 0.2s" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#e8450a")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
               >
-                <Phone size={14} /> +91 98765 43210
-              </a>
-              <a href="mailto:hello@emffitness.com" style={{ display: "flex", gap: 10, alignItems: "center", color: "#6b7280", fontSize: 14, textDecoration: "none", transition: "color 0.2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#e8450a")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-              >
-                <Mail size={14} /> hello@emffitness.com
+                <Phone size={14} /> {getSetting("contact_phone", "+91 9819406259")}
               </a>
             </div>
           </div>
         </div>
 
         {/* Bottom */}
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <div className="footer-bottom" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <p style={{ color: "#4b5563", fontSize: 13 }}>
             © {year} EMF Fitness. All rights reserved.
           </p>
@@ -119,11 +93,10 @@ export default function Footer() {
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          .footer-grid { grid-template-columns: 1fr 1fr !important; }
-        }
-        @media (max-width: 480px) {
-          .footer-grid { grid-template-columns: 1fr !important; }
+        @media (max-width: 820px) {
+          .footer-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .socials-col, .contact-col { margin-left: 0 !important; }
+          .footer-bottom { justify-content: center !important; flex-direction: column; text-align: center; gap: 16px !important; }
         }
       `}</style>
     </footer>

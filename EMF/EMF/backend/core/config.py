@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/emf_fitness"
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:3001"]
     SECRET_KEY: str = "emf-fitness-secret-key-change-in-production"
-    WHATSAPP_NUMBER: str = "+919876543210"
+    WHATSAPP_NUMBER: str = "+919819406259"
 
     class Config:
         env_file = ".env"

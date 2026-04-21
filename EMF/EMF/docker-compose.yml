@@ -29,7 +29,7 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/emf_fitness
       - ALLOWED_ORIGINS=["http://localhost:3000"]
       - SECRET_KEY=emf-fitness-secret-key-change-in-production
-      - WHATSAPP_NUMBER=+919876543210
+      - WHATSAPP_NUMBER=+919819406259
     ports:
       - "8000:8000"
     depends_on:

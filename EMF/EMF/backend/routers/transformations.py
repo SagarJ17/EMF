@@ -14,8 +14,8 @@ class TransformationResponse(BaseModel):
     name: str
     result: str
     quote: str | None
-    before_image: str
-    after_image: str
+    before_image: str | None = None
+    after_image: str | None = None
     video: str | None
 
     class Config:
@@ -31,8 +31,8 @@ class TransformationCreate(BaseModel):
     name: str
     result: str
     quote: str | None = None
-    before_image: str
-    after_image: str
+    before_image: str | None = None
+    after_image: str | None = None
     video: str | None = None
 
 @router.post("/", response_model=TransformationResponse)

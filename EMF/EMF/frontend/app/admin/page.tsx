@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Trash2, Upload, Loader2, Play, Lock, Settings as SettingsIcon, Image as ImageIcon, Video, Star, Activity, Youtube } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  Trash2, Upload, Loader2, Play, Lock,
+  Settings as SettingsIcon, Image as ImageIcon, Save, Eye,
+  Instagram, Youtube, Phone, MessageCircle, BarChart, Download
+} from "lucide-react";
 import Image from "next/image";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import * as XLSX from "xlsx";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin Dashboard Shell
+// ─────────────────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState("transformations");
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   if (!loggedIn) {
@@ -26,7 +34,7 @@ export default function AdminDashboard() {
               placeholder="Enter Master Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              style={{ width: "100%", padding: "14px 16px", borderRadius: 12, border: "1px solid #e5e7eb", marginBottom: 16 }}
+              style={{ width: "100%", padding: "14px 16px", borderRadius: 12, border: "1px solid #e5e7eb", marginBottom: 16, boxSizing: "border-box" }}
             />
             <button type="submit" className="btn-orange" style={{ width: "100%", padding: "14px" }}>Unlock Dashboard</button>
           </form>
@@ -38,58 +46,65 @@ export default function AdminDashboard() {
   return (
     <div style={{ background: "#f3f4f6", minHeight: "100vh", paddingBottom: 60 }}>
       {/* Header */}
-      <div style={{ background: "white", padding: "24px", borderBottom: "1px solid #e5e7eb", position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-          <h1 style={{ fontFamily: "Outfit", fontWeight: 800, fontSize: 28 }}>
-            EMF <span style={{ color: "#e8450a" }}>CMS</span>
-          </h1>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button onClick={() => setActiveTab("transformations")} className={activeTab === "transformations" ? "btn-orange" : "btn-outline"} style={{ padding: "8px 16px", fontSize: 13, gap: 6, display: "flex", alignItems: "center" }}>
-              <ImageIcon size={14} /> Transformations
-            </button>
-            <button onClick={() => setActiveTab("media")} className={activeTab === "media" ? "btn-orange" : "btn-outline"} style={{ padding: "8px 16px", fontSize: 13, gap: 6, display: "flex", alignItems: "center" }}>
-              <Video size={14} /> Media & Reviews
-            </button>
-            <button onClick={() => setActiveTab("services")} className={activeTab === "services" ? "btn-orange" : "btn-outline"} style={{ padding: "8px 16px", fontSize: 13, gap: 6, display: "flex", alignItems: "center" }}>
-              <Activity size={14} /> Training Services
-            </button>
-            <button onClick={() => setActiveTab("settings")} className={activeTab === "settings" ? "btn-orange" : "btn-outline"} style={{ padding: "8px 16px", fontSize: 13, gap: 6, display: "flex", alignItems: "center" }}>
-              <SettingsIcon size={14} /> Site Settings
-            </button>
+      <div style={{ background: "white", padding: "0 24px", borderBottom: "1px solid #e5e7eb", position: "sticky", top: 0, zIndex: 10 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", height: 64 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 36, height: 36, background: "#fff5f0", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "Outfit", fontWeight: 900, fontSize: 14, color: "#e8450a" }}>EMF</span>
+            </div>
+            <h1 style={{ fontFamily: "Outfit", fontWeight: 800, fontSize: 20, margin: 0 }}>
+              Admin <span style={{ color: "#e8450a" }}>CMS</span>
+            </h1>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[
+              { key: "transformations", icon: <ImageIcon size={14} />, label: "Transformations" },
+              { key: "settings", icon: <SettingsIcon size={14} />, label: "Site Settings" },
+              { key: "reports", icon: <BarChart size={14} />, label: "Reports" },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={activeTab === tab.key ? "btn-orange" : "btn-outline"}
+                style={{ padding: "8px 18px", fontSize: 13, gap: 6, display: "flex", alignItems: "center" }}
+              >
+                {tab.icon} {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ maxWidth: activeTab === "settings" ? 1400 : 1200, margin: "0 auto", padding: "32px 24px" }}>
         {activeTab === "transformations" && <TransformationsTab apiUrl={apiUrl} />}
-        {activeTab === "media" && <MediaTab apiUrl={apiUrl} />}
-        {activeTab === "services" && <ServicesTab apiUrl={apiUrl} />}
         {activeTab === "settings" && <SettingsTab apiUrl={apiUrl} />}
+        {activeTab === "reports" && <ReportsTab apiUrl={apiUrl} />}
       </div>
 
       <style>{`
         .admin-grid { display: grid; gap: 32px; grid-template-columns: 1fr 2fr; }
-        .settings-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
         @media (max-width: 900px) { .admin-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 600px) { .settings-grid { grid-template-columns: 1fr; } }
       `}</style>
     </div>
   );
 }
 
-// ------ TRANSFORMATIONS TAB ------
+// ─────────────────────────────────────────────────────────────────────────────
+// Transformations Tab
+// ─────────────────────────────────────────────────────────────────────────────
 function TransformationsTab({ apiUrl }: { apiUrl: string }) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [type, setType] = useState<"image" | "video">("image");
-
   const [name, setName] = useState("");
   const [result, setResult] = useState("");
   const [quote, setQuote] = useState("");
   const [beforeFile, setBeforeFile] = useState<File | null>(null);
   const [afterFile, setAfterFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoSource, setVideoSource] = useState<"upload" | "youtube">("upload");
+  const [youtubeURL, setYoutubeURL] = useState("");
 
   const fetchItems = () => {
     fetch(`${apiUrl}/transformations`).then(r => r.json()).then(setItems).finally(() => setLoading(false));
@@ -105,25 +120,19 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
   const submit = async (e: any) => {
     e.preventDefault();
     if (!name) return alert("Client Name is required.");
-
-    if (type === "image" && (!beforeFile || !afterFile)) {
-      return alert("You selected Image Mode. Both Before and After photos are required.");
-    }
-    if (type === "video" && !videoFile) {
-      return alert("You selected Video Mode. A video file is required.");
-    }
+    if (type === "image" && (!beforeFile || !afterFile)) return alert("Both Before and After photos are required.");
+    if (type === "video" && videoSource === "upload" && !videoFile) return alert("A video file is required.");
+    if (type === "video" && videoSource === "youtube" && !youtubeURL) return alert("A YouTube link is required.");
 
     setSaving(true);
     try {
       let payload: any = { name, result, quote };
-
       if (type === "image") {
         payload.before_image = await uploadFile(beforeFile!, "transformations");
         payload.after_image = await uploadFile(afterFile!, "transformations");
       } else {
-        payload.video = await uploadFile(videoFile!, "transformations");
+        payload.video = videoSource === "upload" ? await uploadFile(videoFile!, "transformations") : youtubeURL;
       }
-
       await fetch(`${apiUrl}/transformations`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -135,92 +144,106 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
 
   return (
     <div className="admin-grid">
-      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.03)", height: "fit-content" }}>
+      {/* Form */}
+      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)", height: "fit-content" }}>
         <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, borderBottom: "1px solid #eee", paddingBottom: 16 }}>
           Add Transformation
         </h2>
 
         <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
-            <input type="radio" checked={type === "image"} onChange={() => setType("image")} /> Photos Mode
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
-            <input type="radio" checked={type === "video"} onChange={() => setType("video")} /> Video Mode
-          </label>
+          {(["image", "video"] as const).map(t => (
+            <label key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer", fontWeight: type === t ? 700 : 400 }}>
+              <input type="radio" checked={type === t} onChange={() => setType(t)} /> {t === "image" ? "📸 Photos Mode" : "🎥 Video Mode"}
+            </label>
+          ))}
         </div>
 
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Client Name *</label>
-            <input required value={name} onChange={e => setName(e.target.value)} type="text" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} placeholder="e.g. John Doe" />
+            <input required value={name} onChange={e => setName(e.target.value)} placeholder="e.g. John Doe" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }} />
           </div>
-
           <div>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Result Claim</label>
-            <input value={result} onChange={e => setResult(e.target.value)} type="text" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} placeholder="e.g. -12kg in 3 months" />
+            <input value={result} onChange={e => setResult(e.target.value)} placeholder="e.g. -12kg in 3 months" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }} />
           </div>
-
           <div>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Testimonial Quote</label>
-            <textarea value={quote} onChange={e => setQuote(e.target.value)} rows={3} style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} placeholder="e.g. EMF changed my life!" />
+            <textarea value={quote} onChange={e => setQuote(e.target.value)} rows={2} placeholder="e.g. EMF changed my life!" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box" }} />
           </div>
 
-          <div style={{ padding: 16, background: "#f9fafb", borderRadius: 12, border: "1px dashed #d1d5db" }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 12 }}>Media Upload (MinIO)</p>
-
-            {type === "image" ? (
-              <>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer", marginBottom: 8, color: "#e8450a" }}>
-                  <Upload size={14} /> Upload Before Photo
-                  <input type="file" style={{ display: "none" }} accept="image/*" onChange={e => setBeforeFile(e.target.files?.[0] || null)} />
-                </label>
-                {beforeFile && <p style={{ fontSize: 11, color: "green", marginBottom: 12 }}>Selected: {beforeFile.name}</p>}
-
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer", marginBottom: 8, color: "#e8450a" }}>
-                  <Upload size={14} /> Upload After Photo
-                  <input type="file" style={{ display: "none" }} accept="image/*" onChange={e => setAfterFile(e.target.files?.[0] || null)} />
-                </label>
-                {afterFile && <p style={{ fontSize: 11, color: "green", marginBottom: 8 }}>Selected: {afterFile.name}</p>}
-              </>
-            ) : (
-              <>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer", marginBottom: 8, color: "#3b82f6" }}>
-                  <Upload size={14} /> Upload Video File (MP4)
-                  <input type="file" style={{ display: "none" }} accept="video/mp4" onChange={e => setVideoFile(e.target.files?.[0] || null)} />
-                </label>
-                {videoFile && <p style={{ fontSize: 11, color: "green", marginBottom: 8 }}>Selected: {videoFile.name}</p>}
-              </>
-            )}
-          </div>
+            <div style={{ padding: 16, background: "#f9fafb", borderRadius: 12, border: "1px dashed #d1d5db" }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 12 }}>Media Source</p>
+              {type === "image" ? (
+                <>
+                  <FileUploadLabel label="📸 Upload Before Photo" accept="image/*" file={beforeFile} onChange={setBeforeFile} />
+                  <FileUploadLabel label="📸 Upload After Photo" accept="image/*" file={afterFile} onChange={setAfterFile} />
+                </>
+              ) : (
+                <>
+                  <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
+                    {(["upload", "youtube"] as const).map(src => (
+                      <label key={src} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer" }}>
+                        <input type="radio" checked={videoSource === src} onChange={() => setVideoSource(src)} /> 
+                        {src === "upload" ? "Upload MP4" : "YouTube Link"}
+                      </label>
+                    ))}
+                  </div>
+                  {videoSource === "upload" ? (
+                    <FileUploadLabel label="🎥 Upload Video (MP4)" accept="video/mp4" file={videoFile} onChange={setVideoFile} />
+                  ) : (
+                    <div>
+                      <input 
+                        value={youtubeURL} 
+                        onChange={e => setYoutubeURL(e.target.value)} 
+                        placeholder="e.g. https://www.youtube.com/watch?v=LXb3EKWsInQ" 
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box", fontSize: 13 }} 
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
 
           <button disabled={saving} className="btn-orange" style={{ padding: "12px", display: "flex", justifyContent: "center", gap: 8 }}>
-            {saving ? <Loader2 size={18} className="animate-spin" /> : "Save to Database"}
+            {saving ? <><Loader2 size={18} className="animate-spin" /> Uploading...</> : <><Upload size={16} /> Save to Database</>}
           </button>
         </form>
       </div>
 
-      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+      {/* List */}
+      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
         <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, borderBottom: "1px solid #eee", paddingBottom: 16 }}>
-          Client Database
+          Client Database ({items.length})
         </h2>
-        {loading ? <p style={{ color: "#9ca3af", fontSize: 14 }}>Loading database...</p> : items.length === 0 ? <p style={{ color: "#9ca3af", fontSize: 14 }}>No transformations found...</p> : items.map(t => (
-          <div key={t.id} style={{ display: "flex", padding: 16, border: "1px solid #f3f4f6", marginBottom: 16, borderRadius: 12, alignItems: "center", gap: 16 }}>
+        {loading ? (
+          <p style={{ color: "#9ca3af", fontSize: 14 }}>Loading...</p>
+        ) : items.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#9ca3af" }}>
+            <ImageIcon size={40} style={{ margin: "0 auto 12px", display: "block", opacity: 0.3 }} />
+            <p style={{ fontSize: 14 }}>No transformations yet. Add the first one!</p>
+          </div>
+        ) : items.map(t => (
+          <div key={t.id} style={{ display: "flex", padding: 16, border: "1px solid #f3f4f6", marginBottom: 12, borderRadius: 12, alignItems: "center", gap: 16 }}>
             {t.video ? (
-              <div style={{ width: 48, height: 48, background: "black", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Play size={16} color="white" />
+              <div style={{ width: 52, height: 52, background: "#111", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Play size={18} color="white" />
               </div>
             ) : (
-              <div style={{ width: 48, height: 48, position: "relative", borderRadius: 8, overflow: "hidden", background: "#eee", flexShrink: 0 }}>
-                {t.after_image && <Image src={t.after_image} alt="" fill style={{ objectFit: "cover" }} unoptimized={t.after_image?.includes("localhost")} />}
+              <div style={{ width: 52, height: 52, position: "relative", borderRadius: 8, overflow: "hidden", background: "#eee", flexShrink: 0 }}>
+                {t.after_image && <Image src={t.after_image} alt="" fill style={{ objectFit: "cover" }} unoptimized />}
               </div>
             )}
-            <div style={{ flex: 1 }}>
-              <p style={{ fontWeight: 600, fontSize: 15, color: "#111827", margin: 0 }}>{t.name}</p>
-              <p style={{ fontSize: 13, color: "#6b7280", margin: "2px 0 0 0" }}>{t.result}</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontWeight: 700, fontSize: 15, color: "#111827", margin: 0 }}>{t.name}</p>
+              <p style={{ fontSize: 13, color: "#6b7280", margin: "2px 0 0" }}>{t.result}</p>
             </div>
+            <span style={{ fontSize: 11, background: t.video ? "#eff6ff" : "#fff5f0", color: t.video ? "#3b82f6" : "#e8450a", padding: "3px 10px", borderRadius: 100, fontWeight: 700, flexShrink: 0 }}>
+              {t.video ? "VIDEO" : "PHOTOS"}
+            </span>
             <button
               onClick={async () => { if (confirm("Delete this entry?")) { await fetch(`${apiUrl}/transformations/${t.id}`, { method: "DELETE" }); fetchItems(); } }}
-              style={{ background: "#fee2e2", border: "none", color: "#ef4444", padding: 10, borderRadius: 8, cursor: "pointer", display: "flex" }}
+              style={{ background: "#fee2e2", border: "none", color: "#ef4444", padding: 10, borderRadius: 8, cursor: "pointer", display: "flex", flexShrink: 0 }}
             >
               <Trash2 size={16} />
             </button>
@@ -231,328 +254,465 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
   );
 }
 
-// ------ MEDIA & REVIEWS TAB ------
-function MediaTab({ apiUrl }: { apiUrl: string }) {
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [videos, setVideos] = useState<any[]>([]);
-  const [ytLoading, setYtLoading] = useState(false);
-
-  const [ytUrl, setYtUrl] = useState("");
-  const [videoTitle, setVideoTitle] = useState("");
-  const [channelUrl, setChannelUrl] = useState("");
-
-  const [rName, setRName] = useState("");
-  const [rComment, setRComment] = useState("");
-  const [rRating, setRRating] = useState(5);
-
-  const fetchData = () => {
-    fetch(`${apiUrl}/reviews`).then(r => r.json()).then(setReviews);
-    fetch(`${apiUrl}/videos`).then(r => r.json()).then(setVideos);
-  };
-  useEffect(() => { fetchData(); }, []);
-
-  const addVideo = async (e: any) => {
-    e.preventDefault();
-    if (!ytUrl || !videoTitle) return;
-    const match = ytUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    const thumb = match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : "";
-    await fetch(`${apiUrl}/videos`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: videoTitle, url: ytUrl, platform: "youtube", thumbnail: thumb })
-    });
-    setYtUrl(""); setVideoTitle(""); fetchData();
-  };
-
-  const autoFetchChannel = async (e: any) => {
-    e.preventDefault();
-    setYtLoading(true);
-    try {
-      const res = await fetch(`/api/youtube?url=${encodeURIComponent(channelUrl)}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-
-      for (const v of data.videos) {
-        await fetch(`${apiUrl}/videos`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: v.title, url: v.url, platform: "youtube", thumbnail: v.thumbnail })
-        });
-      }
-      alert(`Successfully fetched ${data.videos.length} videos!`);
-      setChannelUrl(""); fetchData();
-    } catch (err: any) {
-      alert("Failed to parse channel. Ensure it is a valid url like youtube.com/@Handle");
-    } finally {
-      setYtLoading(false);
-    }
-  };
-
-  const addReview = async (e: any) => {
-    e.preventDefault();
-    let img = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face";
-    await fetch(`${apiUrl}/reviews`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: rName, rating: rRating, comment: rComment, image_url: img })
-    });
-    setRName(""); setRComment(""); setRRating(5); fetchData();
-  };
-
+// ─────────────────────────────────────────────────────────────────────────────
+// File Upload Helper
+// ─────────────────────────────────────────────────────────────────────────────
+function FileUploadLabel({ label, accept, file, onChange }: { label: string; accept: string; file: File | null; onChange: (f: File | null) => void }) {
   return (
-    <div className="admin-grid">
-      <div style={{ background: "white", padding: 32, borderRadius: 20 }}>
-        <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}><Video size={20} color="#e8450a" /> Video Gallery Tracker</h2>
-
-        <div style={{ padding: 16, background: "#fff5f0", borderRadius: 12, marginBottom: 24, border: "1px dashed #e8450a" }}>
-          <h4 style={{ fontWeight: 700, fontSize: 13, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}><Youtube size={14} /> Auto-Fetch from Channel</h4>
-          <form onSubmit={autoFetchChannel} style={{ display: "flex", gap: 8 }}>
-            <input value={channelUrl} onChange={e => setChannelUrl(e.target.value)} type="text" required placeholder="https://youtube.com/@YourHandle" style={{ flex: 1, padding: "8px 12px", border: "1px solid #ccc", borderRadius: 8, fontSize: 13 }} />
-            <button disabled={ytLoading} className="btn-orange" style={{ padding: "8px 16px", fontSize: 13 }}>{ytLoading ? "Parsing..." : "Sync Latest"}</button>
-          </form>
-        </div>
-
-        <h4 style={{ fontWeight: 700, fontSize: 13, marginBottom: 12, color: "#6b7280" }}>OR Single Video Upload</h4>
-        <form onSubmit={addVideo} style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
-          <input value={videoTitle} onChange={e => setVideoTitle(e.target.value)} required type="text" placeholder="Custom Video Title" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-          <input value={ytUrl} onChange={e => setYtUrl(e.target.value)} required type="text" placeholder="Youtube URL (https://...)" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-          <button className="btn-outline" style={{ padding: 12 }}>Inject Single Video</button>
-        </form>
-
-        {videos.map(v => (
-          <div key={v.id} style={{ display: "flex", padding: 12, border: "1px solid #eee", marginBottom: 8, borderRadius: 8, alignItems: "center", gap: 12 }}>
-            <div style={{ width: 60, height: 40, background: "#eee", borderRadius: 4, overflow: "hidden", position: "relative" }}>
-              {v.thumbnail && <Image src={v.thumbnail} alt="" fill style={{ objectFit: "cover" }} />}
-            </div>
-            <div style={{ flex: 1, fontSize: 13 }}><b>{v.title}</b></div>
-            <button onClick={async () => { await fetch(`${apiUrl}/videos/${v.id}`, { method: "DELETE" }); fetchData(); }} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16} /></button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ background: "white", padding: 32, borderRadius: 20 }}>
-        <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}><Star size={20} color="#e8450a" /> Client Reviews (Wall of Love)</h2>
-        <form onSubmit={addReview} style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
-
-          <input value={rName} onChange={e => setRName(e.target.value)} required type="text" placeholder="Client Name" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-
-          {/* Star Selector */}
-          <div style={{ display: "flex", gap: 4, padding: "4px 0" }}>
-            {[1, 2, 3, 4, 5].map(s => (
-              <Star key={s} size={24} onClick={() => setRRating(s)} fill={s <= rRating ? "#fbbf24" : "none"} color={s <= rRating ? "#fbbf24" : "#cbd5e1"} style={{ cursor: "pointer", transition: "all 0.2s" }} />
-            ))}
-          </div>
-
-          <textarea value={rComment} onChange={e => setRComment(e.target.value)} required placeholder="Awesome program..." rows={3} style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-          <button className="btn-outline" style={{ padding: 12 }}>Post Review</button>
-        </form>
-
-        {reviews.map(r => (
-          <div key={r.id} style={{ display: "flex", padding: 12, border: "1px solid #eee", marginBottom: 8, borderRadius: 8, alignItems: "center", gap: 12 }}>
-            <div style={{ flex: 1, fontSize: 13 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <b>{r.name}</b>
-                <div style={{ display: "flex" }}>{[...Array(r.rating)].map((_, i) => <Star key={i} size={12} fill="#fbbf24" color="#fbbf24" />)}</div>
-              </div>
-              <p style={{ margin: "4px 0 0", color: "#6b7280", maxHeight: 40, overflow: "hidden" }}>{r.comment}</p>
-            </div>
-            <button onClick={async () => { await fetch(`${apiUrl}/reviews/${r.id}`, { method: "DELETE" }); fetchData(); }} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}><Trash2 size={16} /></button>
-          </div>
-        ))}
-      </div>
+    <div style={{ marginBottom: 10 }}>
+      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer", color: "#e8450a", fontWeight: 600 }}>
+        <Upload size={13} /> {label}
+        <input type="file" style={{ display: "none" }} accept={accept} onChange={e => onChange(e.target.files?.[0] || null)} />
+      </label>
+      {file && <p style={{ fontSize: 11, color: "#16a34a", marginTop: 4 }}>✓ {file.name}</p>}
     </div>
   );
 }
 
-// ------ SERVICES TAB ------
-function ServicesTab({ apiUrl }: { apiUrl: string }) {
-  const [cards, setCards] = useState<any[]>([]);
-  const [saving, setSaving] = useState(false);
-
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
-  const [desc, setDesc] = useState("");
-  const [features, setFeatures] = useState("");
-  const [iconName, setIconName] = useState("Activity");
-
-  useEffect(() => {
-    fetch(`${apiUrl}/settings`).then(r => r.json()).then(s => {
-      if (s.services_cards) {
-        try { setCards(JSON.parse(s.services_cards)); } catch { }
-      }
-    });
-  }, [apiUrl]);
-
-  const saveToPostgres = async (arr: any[]) => {
-    setSaving(true);
-    await fetch(`${apiUrl}/settings`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ services_cards: JSON.stringify(arr) })
-    });
-    setSaving(false);
-  };
-
-  const addCard = async (e: any) => {
-    e.preventDefault();
-    if (!title || !desc) return;
-    const newArr = [...cards, {
-      title, price, desc,
-      features: features.split(",").map(i => i.trim()).filter(i => i),
-      iconName
-    }];
-    setCards(newArr);
-    await saveToPostgres(newArr);
-    setTitle(""); setPrice(""); setDesc(""); setFeatures("");
-  };
-
-  return (
-    <div className="admin-grid">
-      <div style={{ background: "white", padding: 32, borderRadius: 20 }}>
-        <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24 }}>Assemble Service Package</h2>
-        <form onSubmit={addCard} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Package Name (e.g. Fat Loss)" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-          <input value={price} onChange={e => setPrice(e.target.value)} placeholder="Pricing (e.g. Starting ₹2,999/mo)" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-          <textarea value={desc} onChange={e => setDesc(e.target.value)} required rows={3} placeholder="Package description..." style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-          <textarea value={features} onChange={e => setFeatures(e.target.value)} rows={3} placeholder="Feature 1, Feature 2, Feature 3 (Comma separated)" style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }} />
-
-          <div>
-            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Lucide Icon Name</label>
-            <select value={iconName} onChange={e => setIconName(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8 }}>
-              <option value="Home">Home</option>
-              <option value="Monitor">Monitor (Online)</option>
-              <option value="Flame">Flame (Fat Loss)</option>
-              <option value="Dumbbell">Dumbbell (Strength)</option>
-              <option value="Activity">Activity (Metrics)</option>
-            </select>
-          </div>
-
-          <button disabled={saving} className="btn-orange" style={{ padding: "12px" }}>
-            {saving ? "Deploying..." : "Add Package"}
-          </button>
-        </form>
-      </div>
-
-      <div style={{ background: "white", padding: 32, borderRadius: 20 }}>
-        <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24 }}>Active Packages</h2>
-        {cards.length === 0 ? <p style={{ color: "#6b7280", fontSize: 14 }}>No custom packages configured. Site is defaulting to Fallback Array.</p> : cards.map((c, idx) => (
-          <div key={idx} style={{ padding: 16, border: "1px solid #f3f4f6", borderRadius: 12, marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
-              <strong style={{ fontSize: 15, color: "#111827" }}>{c.title}</strong>
-              <p style={{ margin: "4px 0", fontSize: 13, color: "#e8450a", fontWeight: "bold" }}>{c.price}</p>
-              <p style={{ margin: "4px 0", fontSize: 13, color: "#6b7280", lineHeight: 1.5 }}>{c.desc}</p>
-              <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {c.features?.map((f: string, i: number) => (
-                  <span key={i} style={{ background: "#f3f4f6", padding: "4px 8px", borderRadius: 4, fontSize: 11, color: "#374151" }}>{f}</span>
-                ))}
-              </div>
-            </div>
-            <button onClick={async () => {
-              const newArr = cards.filter((_, i) => i !== idx);
-              setCards(newArr); await saveToPostgres(newArr);
-            }} style={{ background: "#fee2e2", border: "none", color: "#ef4444", padding: 8, borderRadius: 8, cursor: "pointer" }}>
-              <Trash2 size={16} />
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ------ SETTINGS TAB ------
+// ─────────────────────────────────────────────────────────────────────────────
+// Settings Tab — Left editor + Right sandbox live preview
+// ─────────────────────────────────────────────────────────────────────────────
 function SettingsTab({ apiUrl }: { apiUrl: string }) {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [heroVideoFile, setHeroVideoFile] = useState<File | null>(null);
+  const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetch(`${apiUrl}/settings`).then(r => r.json()).then(setSettings);
   }, [apiUrl]);
 
   const update = (key: string, val: string) => setSettings(p => ({ ...p, [key]: val }));
+  const g = (key: string, fallback: string) => settings[key] || fallback;
 
   const save = async (e: any) => {
     e.preventDefault();
     setSaving(true);
     let dict = { ...settings };
-
     if (pdfFile) {
       const fd = new FormData(); fd.append("file", pdfFile);
       const res = await fetch(`${apiUrl}/upload?folder=pdfs`, { method: "POST", body: fd });
       dict.diet_pdf_url = (await res.json()).url;
     }
-
+    if (heroVideoFile) {
+      const fd = new FormData(); fd.append("file", heroVideoFile);
+      const res = await fetch(`${apiUrl}/upload?folder=settings`, { method: "POST", body: fd });
+      dict.hero_video_url = (await res.json()).url;
+    }
+    if (aboutImageFile) {
+      const fd = new FormData(); fd.append("file", aboutImageFile);
+      const res = await fetch(`${apiUrl}/upload?folder=settings`, { method: "POST", body: fd });
+      dict.about_image_url = (await res.json()).url;
+    }
     try {
       await fetch(`${apiUrl}/settings`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dict)
       });
-      alert("\u2713 Settings globally deployed!");
-    } finally {
-      setSaving(false);
-    }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } finally { setSaving(false); }
   };
 
   return (
-    <div style={{ background: "white", padding: 40, borderRadius: 20 }}>
-      <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 24, marginBottom: 8 }}>Global Site Settings</h2>
-      <p style={{ color: "#6b7280", marginBottom: 32 }}>These structural elements mimic exactly the layout flow of the Live Application to prevent misconfiguration.</p>
+    <div style={{ display: "grid", gridTemplateColumns: "420px 1fr", gap: 24, alignItems: "start", minHeight: "calc(100vh - 120px)" }} className="settings-layout">
+      {/* ── LEFT: Editor ─────────────────────────────────── */}
+      <div style={{ background: "white", borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)", overflow: "hidden", position: "sticky", top: 80, maxHeight: "calc(100vh - 110px)", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          <SettingsIcon size={18} color="#e8450a" />
+          <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 18, margin: 0 }}>Page Editor</h2>
+          <span style={{ marginLeft: "auto", fontSize: 11, color: "#9ca3af" }}>Edits reflect in sandbox →</span>
+        </div>
 
-      <form onSubmit={save} style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+        <div style={{ overflowY: "auto", flex: 1, padding: "0 24px 24px" }}>
+          <form onSubmit={save}>
 
-        {/* HERO SECTION MIMIC */}
-        <div style={{ border: "2px solid #f3f4f6", borderRadius: 16, overflow: "hidden" }}>
-          <div style={{ background: "#f9fafb", padding: "16px 24px", borderBottom: "1px solid #f3f4f6", fontWeight: "bold" }}>1. Hero Conversion Area</div>
-          <div style={{ padding: 24, display: "grid", gap: 16 }}>
-            <input placeholder="Hero Main Headline" value={settings.hero_headline || "Transform Your Body / Without Leaving / Home"} onChange={e => update("hero_headline", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8, fontSize: 16, fontWeight: 700 }} />
-            <input placeholder="Hero Subheadline" value={settings.hero_subheadline || ""} onChange={e => update("hero_subheadline", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-            <div className="settings-grid">
-              <input placeholder="'Train With Me' Button Output (URL or #book anchor)" value={settings.train_with_me_link || ""} onChange={e => update("train_with_me_link", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
+            {/* ── Hero Section ─────────────────────────── */}
+            <SectionHeader emoji="🏠" label="Hero Section" />
+            <Field label="Badge Text" value={g("hero_badge", "Rated 5.0 by 200+ Clients")} onChange={v => update("hero_badge", v)} />
+            <Field label="Main Headline" value={g("hero_headline", "Transform Your Body\nWithout Leaving\nHome")} onChange={v => update("hero_headline", v)} rows={3} />
+            <Field label="Sub-headline" value={g("hero_subheadline", "Elite personal training brought to your doorstep.")} onChange={v => update("hero_subheadline", v)} rows={2} />
+            <Field label="CTA Button Label" value={g("cta_button_label", "Train With Me")} onChange={v => update("cta_button_label", v)} />
+            <Field label="CTA Button Link (URL or #anchor)" value={g("train_with_me_link", "#contact")} onChange={v => update("train_with_me_link", v)} />
+            <Field label="Hero Trust Pills (separated by |)" value={g("hero_trust_pills", "200+ Clients Transformed|Home & Centre|5★ Rated")} onChange={v => update("hero_trust_pills", v)} />
+            <Field label="Slots Banner Headline" value={g("hero_slots_headline", "🔥 Only 5 Slots Left This Month")} onChange={v => update("hero_slots_headline", v)} />
+            <Field label="Slots Banner Subheadline" value={g("hero_slots_sub", "Limited availability for new clients")} onChange={v => update("hero_slots_sub", v)} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <StatField valKey="hero_float1_num" lblKey="hero_float1_label" valDef="200+" lblDef="Lives Transformed" settings={settings} update={update} />
+              <StatField valKey="hero_float2_num" lblKey="hero_float2_label" valDef="4 yrs" lblDef="Training Experience" settings={settings} update={update} />
+            </div>
+            
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Background Video (MP4)</label>
+              <input type="file" accept="video/mp4" onChange={e => setHeroVideoFile(e.target.files?.[0] || null)} style={{ fontSize: 12, width: "100%", padding: 8, background: "#f9fafb", borderRadius: 8, border: "1px solid #e5e7eb", cursor: "pointer" }} />
+              {settings.hero_video_url && <p style={{ fontSize: 10, color: "#9ca3af", marginTop: 4, wordBreak: "break-all" }}>Current: {settings.hero_video_url}</p>}
+            </div>
+
+            {/* ── About Section ────────────────────────── */}
+            <SectionHeader emoji="👤" label="About Founder" />
+            <Field label="Title Prefix (e.g. 'Hi, I'm')" value={g("about_title", "Hi, I'm")} onChange={v => update("about_title", v)} />
+            <Field label="Founder Name" value={g("about_name", "Neeraj Bhadauria")} onChange={v => update("about_name", v)} />
+            <Field label="Paragraph 1" value={g("about_p1", "")} onChange={v => update("about_p1", v)} rows={3} />
+            <Field label="Paragraph 2" value={g("about_p2", "")} onChange={v => update("about_p2", v)} rows={3} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <StatField valKey="about_stat1_val" lblKey="about_stat1_lbl" valDef="200+" lblDef="Clients Transformed" settings={settings} update={update} />
+              <StatField valKey="about_stat2_val" lblKey="about_stat2_lbl" valDef="4+" lblDef="Years Experience" settings={settings} update={update} />
+              <StatField valKey="about_stat3_val" lblKey="about_stat3_lbl" valDef="1000+" lblDef="Sessions Delivered" settings={settings} update={update} />
+              <StatField valKey="about_stat4_val" lblKey="about_stat4_lbl" valDef="100%" lblDef="Personalised Plans" settings={settings} update={update} />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Profile Image</label>
+              <input type="file" accept="image/*" onChange={e => setAboutImageFile(e.target.files?.[0] || null)} style={{ fontSize: 12, width: "100%", padding: 8, background: "#f9fafb", borderRadius: 8, border: "1px solid #e5e7eb", cursor: "pointer" }} />
+              {settings.about_image_url && <p style={{ fontSize: 10, color: "#9ca3af", marginTop: 4, wordBreak: "break-all" }}>Current: {settings.about_image_url}</p>}
+            </div>
+
+            {/* ── Socials & Contact ─────────────────────── */}
+            <SectionHeader emoji="🔗" label="Socials & Contact" />
+            <Field label="WhatsApp Number (digits only, e.g. 919819406259)" value={g("whatsapp_number", "919819406259")} onChange={v => update("whatsapp_number", v)} />
+            <Field label="Contact Phone Label" value={g("contact_phone", "+91 9819406259")} onChange={v => update("contact_phone", v)} />
+            <Field label="Instagram URL" value={g("social_instagram", "https://instagram.com")} onChange={v => update("social_instagram", v)} />
+            <Field label="YouTube URL" value={g("social_youtube", "https://youtube.com")} onChange={v => update("social_youtube", v)} />
+            <Field label="Footer Description" value={g("footer_blurb", "Experience high-end personal training crafted around you.")} onChange={v => update("footer_blurb", v)} rows={2} />
+
+            {/* ── Lead Magnet PDF ───────────────────────── */}
+            <SectionHeader emoji="📄" label="Free Diet Plan PDF" />
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Upload PDF</label>
+              <input type="file" accept="application/pdf" onChange={e => setPdfFile(e.target.files?.[0] || null)} style={{ fontSize: 12, width: "100%", padding: 8, background: "#f9fafb", borderRadius: 8, border: "1px solid #e5e7eb", cursor: "pointer" }} />
+              {settings.diet_pdf_url && <p style={{ fontSize: 10, color: "#9ca3af", marginTop: 4, wordBreak: "break-all" }}>Current: {settings.diet_pdf_url}</p>}
+            </div>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-orange"
+              style={{ width: "100%", padding: "14px", fontSize: 15, marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+            >
+              {saving ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Saving...</> : saved ? <><span>✓</span> Saved & Applied!</> : <><Save size={16} /> Save All Changes</>}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* ── RIGHT: Sandbox Preview ───────────────────────── */}
+      <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 2px 24px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)" }}>
+        {/* Browser chrome mock */}
+        <div style={{ background: "#1e1e2e", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {["#ff5f57", "#febc2e", "#28c840"].map(c => <div key={c} style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />)}
+          </div>
+          <div style={{ flex: 1, background: "#2d2d3f", borderRadius: 6, padding: "4px 12px", marginLeft: 8 }}>
+            <span style={{ fontSize: 11, color: "#9ca3af", fontFamily: "monospace" }}>
+              emffitness.com — Live Preview
+            </span>
+          </div>
+          <Eye size={14} color="#9ca3af" />
+        </div>
+
+        {/* Page sandbox */}
+        <div style={{ background: "white", fontFamily: "Outfit, Inter, sans-serif" }}>
+
+          {/* NAVBAR preview */}
+          <div style={{ padding: "12px 24px", borderBottom: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "white", zIndex: 5 }}>
+            <div style={{ width: 32, height: 32, background: "#fff5f0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontWeight: 900, fontSize: 11, color: "#e8450a" }}>EMF</span>
+            </div>
+            <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+              {["Founder", "Results", "About"].map(l => <span key={l} style={{ fontSize: 11, color: "#3d3d3d", fontWeight: 600 }}>{l}</span>)}
+              <span style={{ background: "#e8450a", color: "white", fontSize: 11, padding: "5px 12px", borderRadius: 8, fontWeight: 700 }}>
+                {g("cta_button_label", "Book Session")}
+              </span>
+            </div>
+          </div>
+
+          {/* HERO preview */}
+          <div style={{ background: "linear-gradient(160deg, #fff 0%, #fff8f5 50%, #fff 100%)", padding: "40px 24px 32px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "center" }}>
+              <div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(232,69,10,0.1)", color: "#e8450a", fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 100, border: "1px solid rgba(232,69,10,0.2)", marginBottom: 12 }}>
+                  ⭐ {g("hero_badge", "Rated 5.0 by 200+ Clients")}
+                </div>
+
+                <h2 style={{ fontFamily: "Outfit", fontWeight: 900, fontSize: 20, lineHeight: 1.15, color: "#0f0f0f", marginBottom: 10, whiteSpace: "pre-line" }}>
+                  {g("hero_headline", "Transform Your Body\nWithout Leaving\nHome")}
+                </h2>
+                <p style={{ fontSize: 11, color: "#6b7280", lineHeight: 1.6, marginBottom: 16, maxWidth: 280 }}>
+                  {g("hero_subheadline", "Elite personal training brought to your doorstep.")}
+                </p>
+
+                {/* Trust Pills Mock */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                  {g("hero_trust_pills", "200+ Clients Transformed|Home & Centre|5★ Rated")
+                    .split("|")
+                    .map(s => s.trim())
+                    .filter(Boolean)
+                    .map(item => (
+                      <div key={item} style={{ background: "white", padding: "4px 10px", fontSize: 9, borderRadius: 100, border: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", gap: 4, fontWeight: 600 }}>
+                        <span style={{ color: "#e8450a" }}>✓</span> {item}
+                      </div>
+                    ))}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ background: "#e8450a", color: "white", fontSize: 11, padding: "7px 14px", borderRadius: 8, fontWeight: 700 }}>
+                    🏋️ {g("cta_button_label", "Train With Me")} →
+                  </span>
+                  <span style={{ border: "1.5px solid #e8450a", color: "#e8450a", fontSize: 11, padding: "6px 14px", borderRadius: 8, fontWeight: 700 }}>
+                    🏆 See Results
+                  </span>
+                </div>
+              </div>
+              <div style={{ borderRadius: 16, overflow: "hidden", aspectRatio: "4/5", background: "linear-gradient(135deg, #1a1a1a, #2a2a2a)", position: "relative" }}>
+                 <video src={heroVideoFile ? URL.createObjectURL(heroVideoFile) : settings.hero_video_url} loop autoPlay muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                 
+                 {/* Slots Badge Mock */}
+                 <div style={{ position: "absolute", bottom: 8, left: 8, right: 8, background: "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", padding: "6px 8px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.4)" }}>
+                   <div style={{ fontSize: 9, color: "white", fontWeight: 700 }}>{g("hero_slots_headline", "🔥 Only 5 Slots Left This Month")}</div>
+                   <div style={{ fontSize: 8, color: "rgba(255,255,255,0.8)" }}>{g("hero_slots_sub", "Limited availability for new clients")}</div>
+                 </div>
+                 
+                 {/* Floating Stats Mock */}
+                 <div style={{ position: "absolute", top: 10, right: -10, background: "white", padding: "6px 8px", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                   <div style={{ fontSize: 12, fontWeight: 800, color: "#e8450a", lineHeight: 1 }}>{g("hero_float1_num", "200+")}</div>
+                   <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600 }}>{g("hero_float1_label", "Lives Transformed")}</div>
+                 </div>
+                 <div style={{ position: "absolute", bottom: 40, left: -10, background: "white", padding: "6px 8px", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                   <div style={{ fontSize: 12, fontWeight: 800, color: "#e8450a", lineHeight: 1 }}>{g("hero_float2_num", "4 yrs")}</div>
+                   <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600 }}>{g("hero_float2_label", "Training Experience")}</div>
+                 </div>
+                 
+              </div>
+            </div>
+          </div>
+
+          {/* ABOUT preview */}
+          <div style={{ padding: "28px 24px", background: "#f9f9f9", borderTop: "1px solid rgba(0,0,0,0.04)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
+              {[
+                { v: g("about_stat1_val", "200+"), l: g("about_stat1_lbl", "Clients Transformed") },
+                { v: g("about_stat2_val", "4+"), l: g("about_stat2_lbl", "Years Experience") },
+                { v: g("about_stat3_val", "1000+"), l: g("about_stat3_lbl", "Sessions Delivered") },
+                { v: g("about_stat4_val", "100%"), l: g("about_stat4_lbl", "Personalised Plans") },
+              ].map((s, i) => (
+                <div key={i} style={{ background: "white", borderRadius: 12, padding: "12px 8px", textAlign: "center", border: "1px solid rgba(0,0,0,0.06)" }}>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: "#e8450a", fontFamily: "Outfit" }}>{s.v}</div>
+                  <div style={{ fontSize: 9, color: "#6b7280", marginTop: 2, lineHeight: 1.3 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, alignItems: "center" }}>
+              <div style={{ borderRadius: 14, aspectRatio: "3/4", background: "linear-gradient(135deg, #d1d5db, #e5e7eb)", position: "relative", overflow: "hidden" }}>
+                 {(aboutImageFile || settings.about_image_url) ? (
+                   <img src={aboutImageFile ? URL.createObjectURL(aboutImageFile) : settings.about_image_url} alt="Founder" style={{ objectFit: "cover", width: "100%", height: "100%" }} />
+                 ) : (
+                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}><span style={{ fontSize: 28 }}>👤</span></div>
+                 )}
+              </div>
+              <div>
+                <span style={{ fontSize: 9, color: "#e8450a", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" }}>About The Founder</span>
+                <h3 style={{ fontFamily: "Outfit", fontWeight: 800, fontSize: 16, marginTop: 6, marginBottom: 8 }}>
+                  {g("about_title", "Hi, I'm")} <span style={{ color: "#e8450a" }}>{g("about_name", "Neeraj Bhadauria")}</span>
+                </h3>
+                <p style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.6, marginBottom: 6 }}>{g("about_p1", "With 4+ years of hands-on experience...")}</p>
+                <p style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.6 }}>{g("about_p2", "Every programme I build is 100% tailored...")}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* FOOTER preview */}
+          <div style={{ background: "#0f0f0f", padding: "24px", color: "white" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
+              <div>
+                <div style={{ fontFamily: "Outfit", fontWeight: 800, fontSize: 14, color: "#e8450a", marginBottom: 6 }}>EMF Fitness</div>
+                <p style={{ fontSize: 10, color: "#6b7280", maxWidth: 200, lineHeight: 1.6 }}>{g("footer_blurb", "Experience high-end personal training crafted around you.")}</p>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "white", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>Socials</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <a href={g("social_instagram", "#")} target="_blank" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.08)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Instagram size={12} color="#6b7280" />
+                  </a>
+                  <a href={g("social_youtube", "#")} target="_blank" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.08)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Youtube size={12} color="#6b7280" />
+                  </a>
+                  <a href={`https://wa.me/${g("whatsapp_number", "919819406259")}`} target="_blank" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.08)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <MessageCircle size={12} color="#6b7280" />
+                  </a>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "white", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>Contact</div>
+                <a href={`tel:${g("contact_phone", "+91 9819406259")}`} style={{ display: "flex", gap: 6, alignItems: "center", color: "#6b7280", fontSize: 10, textDecoration: "none" }}>
+                  <Phone size={10} /> {g("contact_phone", "+91 9819406259")}
+                </a>
+              </div>
+            </div>
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12, fontSize: 10, color: "#4b5563" }}>
+              © {new Date().getFullYear()} EMF Fitness. All rights reserved.
             </div>
           </div>
         </div>
+      </div>
 
-        {/* LEAD MAGNET MIMIC */}
-        <div style={{ border: "2px solid #f3f4f6", borderRadius: 16, overflow: "hidden" }}>
-          <div style={{ background: "#f9fafb", padding: "16px 24px", borderBottom: "1px solid #f3f4f6", fontWeight: "bold" }}>2. Lead Acquisition (Free Diet Plan)</div>
-          <div style={{ padding: 24, background: "#fff5f0" }}>
-            <p style={{ fontSize: 13, marginBottom: 12, color: "#e8450a", fontWeight: "bold", display: "flex", alignItems: "center", gap: 6 }}><Upload size={16} /> Upload Database Strategy PDF</p>
-            <input type="file" accept="application/pdf" onChange={e => setPdfFile(e.target.files?.[0] || null)} style={{ fontSize: 13, background: "white", padding: 12, borderRadius: 8, width: "100%" }} />
-            <p style={{ fontSize: 11, marginTop: 8, color: "#6b7280" }}>Current MinIO Bound URL: {settings.diet_pdf_url || "Default Resource"}</p>
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @media (max-width: 1100px) {
+          .settings-layout { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reusable field components
+// ─────────────────────────────────────────────────────────────────────────────
+function SectionHeader({ emoji, label }: { emoji: string; label: string }) {
+  return (
+    <div style={{ marginTop: 24, marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid #f3f4f6" }}>
+      <span style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 13, color: "#374151" }}>{emoji} {label}</span>
+    </div>
+  );
+}
+
+function Field({ label, value, onChange, rows }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) {
+  const base = { width: "100%", padding: "9px 12px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" as const, outline: "none", transition: "border-color 0.2s" };
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</label>
+      {rows ? (
+        <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows} style={{ ...base, resize: "vertical" }} />
+      ) : (
+        <input value={value} onChange={e => onChange(e.target.value)} style={base} />
+      )}
+    </div>
+  );
+}
+
+function StatField({ valKey, lblKey, valDef, lblDef, settings, update }: { valKey: string; lblKey: string; valDef: string; lblDef: string; settings: Record<string, string>; update: (k: string, v: string) => void }) {
+  const inputStyle = { width: "100%", padding: "7px 10px", border: "1px solid #e5e7eb", borderRadius: 6, fontSize: 12, boxSizing: "border-box" as const };
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <input value={settings[valKey] || ""} onChange={e => update(valKey, e.target.value)} placeholder={valDef} style={{ ...inputStyle, fontWeight: 700, marginBottom: 4 }} />
+      <input value={settings[lblKey] || ""} onChange={e => update(lblKey, e.target.value)} placeholder={lblDef} style={inputStyle} />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reports Tab
+// ─────────────────────────────────────────────────────────────────────────────
+function ReportsTab({ apiUrl }: { apiUrl: string }) {
+  const [data, setData] = useState({ table: [], chart: [] } as { table: any[], chart: any[] });
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetch(`${apiUrl}/reports`)
+      .then(r => r.json())
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, [apiUrl]);
+
+  const downloadExcel = () => {
+    if (!data.table.length) return;
+    const ws = XLSX.utils.json_to_sheet(data.table);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Leads & Bookings");
+    XLSX.writeFile(wb, "EMF_Fitness_Reports.xlsx");
+  };
+
+  if (loading) return <div style={{ textAlign: "center", padding: 40 }}><Loader2 className="animate-spin" size={32} style={{ margin: "0 auto", color: "#e8450a" }} /></div>;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+      {/* ── DOT GRAPH ── */}
+      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
+        <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, borderBottom: "1px solid #eee", paddingBottom: 16 }}>
+          Conversion Trends (Last 30 Days)
+        </h2>
+        <div style={{ width: "100%", height: 300 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data.chart} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#e8450a" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#e8450a" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis />
+              <Tooltip />
+              <Area type="monotone" dataKey="contacts" stroke="#e8450a" fillOpacity={1} fill="url(#colorLeads)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ── DATATABLE ── */}
+      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #eee", flexWrap: "wrap", gap: 16 }}>
+          <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, margin: 0 }}>
+            Incoming Contacts
+          </h2>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <input 
+              placeholder="Search leads..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                padding: "8px 14px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, minWidth: 200
+              }}
+            />
+            <button onClick={downloadExcel} className="btn-outline" style={{ padding: "8px 16px", fontSize: 13, gap: 6, display: "flex", alignItems: "center" }}>
+              <Download size={14} /> Download Excel
+            </button>
           </div>
         </div>
 
-        {/* ABOUT FOUNDER MIMIC */}
-        <div style={{ border: "2px solid #f3f4f6", borderRadius: 16, overflow: "hidden" }}>
-          <div style={{ background: "#f9fafb", padding: "16px 24px", borderBottom: "1px solid #f3f4f6", fontWeight: "bold" }}>3. About Developer Metrics</div>
-          <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-            <input placeholder="Founder Name Box" value={settings.about_name || "Neeraj Bhadauria"} onChange={e => update("about_name", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-            <textarea rows={2} placeholder="Paragraph 1 Block" value={settings.about_p1 || ""} onChange={e => update("about_p1", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-            <textarea rows={2} placeholder="Paragraph 2 Block" value={settings.about_p2 || ""} onChange={e => update("about_p2", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-
-            <div className="settings-grid" style={{ background: "#f9fafb", padding: 16, borderRadius: 12 }}>
-              <div><label style={{ fontSize: 11, color: "#6b7280" }}>Clients Transformed Metric</label><br /><input value={settings.about_stat1_val || ""} style={{ width: "25%", padding: "8px", border: "1px solid #ccc", borderRadius: 8, marginRight: 8 }} onChange={e => update("about_stat1_val", e.target.value)} /><input value={settings.about_stat1_lbl || "Clients Transformed"} style={{ width: "70%", padding: "8px", border: "1px solid #ccc", borderRadius: 8 }} onChange={e => update("about_stat1_lbl", e.target.value)} /></div>
-              <div><label style={{ fontSize: 11, color: "#6b7280" }}>Years Experience Metric</label><br /><input value={settings.about_stat2_val || ""} style={{ width: "25%", padding: "8px", border: "1px solid #ccc", borderRadius: 8, marginRight: 8 }} onChange={e => update("about_stat2_val", e.target.value)} /><input value={settings.about_stat2_lbl || "Years Experience"} style={{ width: "70%", padding: "8px", border: "1px solid #ccc", borderRadius: 8 }} onChange={e => update("about_stat2_lbl", e.target.value)} /></div>
-              <div><label style={{ fontSize: 11, color: "#6b7280" }}>Sessions Delivered Metric</label><br /><input value={settings.about_stat3_val || ""} style={{ width: "25%", padding: "8px", border: "1px solid #ccc", borderRadius: 8, marginRight: 8 }} onChange={e => update("about_stat3_val", e.target.value)} /><input value={settings.about_stat3_lbl || "Sessions Delivered"} style={{ width: "70%", padding: "8px", border: "1px solid #ccc", borderRadius: 8 }} onChange={e => update("about_stat3_lbl", e.target.value)} /></div>
-              <div><label style={{ fontSize: 11, color: "#6b7280" }}>Custom Core Metric 4</label><br /><input value={settings.about_stat4_val || ""} style={{ width: "25%", padding: "8px", border: "1px solid #ccc", borderRadius: 8, marginRight: 8 }} onChange={e => update("about_stat4_val", e.target.value)} /><input value={settings.about_stat4_lbl || "Personalised Plans"} style={{ width: "70%", padding: "8px", border: "1px solid #ccc", borderRadius: 8 }} onChange={e => update("about_stat4_lbl", e.target.value)} /></div>
-            </div>
-            <textarea rows={2} placeholder="Certifications & Specialties (separate by pipeline | symbol)" value={settings.about_certs || ""} onChange={e => update("about_certs", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-          </div>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+            <thead>
+              <tr style={{ background: "#f9fafb", textAlign: "left", fontSize: 12, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <th style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}>ID</th>
+                <th style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}>Date</th>
+                <th style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}>Name / Contact</th>
+                <th style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}>Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.table.filter(r => 
+                r.name.toLowerCase().includes(search.toLowerCase()) || 
+                r.email.toLowerCase().includes(search.toLowerCase()) || 
+                r.phone.includes(search) || 
+                (r.details && r.details.toLowerCase().includes(search.toLowerCase()))
+              ).length === 0 ? (
+                <tr><td colSpan={5} style={{ padding: 30, textAlign: "center", color: "#9ca3af" }}>No records found.</td></tr>
+              ) : data.table
+                .filter(r => 
+                  r.name.toLowerCase().includes(search.toLowerCase()) || 
+                  r.email.toLowerCase().includes(search.toLowerCase()) || 
+                  r.phone.includes(search) || 
+                  (r.details && r.details.toLowerCase().includes(search.toLowerCase()))
+                )
+                .map(r => (
+                <tr key={r.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                  <td style={{ padding: "14px 16px", fontSize: 12, fontWeight: 700, color: "#4b5563" }}>{r.id}</td>
+                  <td style={{ padding: "14px 16px", fontSize: 13, color: "#6b7280" }}>{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td style={{ padding: "14px 16px", fontSize: 13 }}>
+                    <div style={{ fontWeight: 600, color: "#111827" }}>{r.name}</div>
+                    <div style={{ fontSize: 11, color: "#6b7280" }}>{r.email} | {r.phone}</div>
+                  </td>
+                  <td style={{ padding: "14px 16px", fontSize: 13, color: "#4b5563", maxWidth: 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
+                    {r.details || "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-        {/* FOOTER MIMIC */}
-        <div style={{ border: "2px solid #f3f4f6", borderRadius: 16, overflow: "hidden" }}>
-          <div style={{ background: "#f9fafb", padding: "16px 24px", borderBottom: "1px solid #f3f4f6", fontWeight: "bold" }}>4. Site Footer Links</div>
-          <div style={{ padding: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <input placeholder="Footer Description Text" value={settings.footer_blurb || ""} onChange={e => update("footer_blurb", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8, gridColumn: "1 / -1" }} />
-            <input placeholder="Instagram External URL" value={settings.social_instagram || ""} onChange={e => update("social_instagram", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-            <input placeholder="YouTube External URL" value={settings.social_youtube || ""} onChange={e => update("social_youtube", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-            <input placeholder="WhatsApp External URL (wa.me/...)" value={settings.social_whatsapp || ""} onChange={e => update("social_whatsapp", e.target.value)} style={{ padding: "12px", border: "1px solid #ccc", borderRadius: 8 }} />
-          </div>
-        </div>
-
-        <button disabled={saving} className="btn-orange" style={{ padding: "18px", fontSize: 18, marginTop: 16, boxShadow: "0 10px 25px -5px rgba(232, 69, 10, 0.4)" }}>
-          {saving ? "Deploying Site Updates..." : "Save All Master Settings"}
-        </button>
-
-      </form>
+      </div>
     </div>
   );
 }

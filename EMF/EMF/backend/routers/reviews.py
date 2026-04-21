@@ -52,7 +52,7 @@ async def get_reviews(db: AsyncSession = Depends(get_db)):
         for r in SEED_REVIEWS:
             review = Review(**r)
             db.add(review)
-        await db.flush()
+        await db.commit()
         result = await db.execute(select(Review).order_by(Review.id))
         reviews = result.scalars().all()
 

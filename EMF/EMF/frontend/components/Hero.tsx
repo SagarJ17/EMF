@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Gift, Star, CheckCircle } from "lucide-react";
+import { ArrowRight, Gift, Star, CheckCircle, Trophy, Dumbbell } from "lucide-react";
 import Image from "next/image";
 import { useCMSStore } from "@/store/cmsStore";
 
@@ -118,7 +118,7 @@ export default function Hero() {
             >
               {[
                 "200+ Clients Transformed",
-                "Home & Online",
+                "Home & Centre",
                 "5★ Rated",
               ].map((item) => (
                 <div
@@ -150,11 +150,11 @@ export default function Hero() {
               transition={{ delay: 0.65 }}
               style={{ display: "flex", gap: 14, flexWrap: "wrap" }}
             >
-              <a href={getSetting("train_with_me_link", "#book")} className="btn-orange" style={{ fontSize: 16, padding: "16px 32px" }}>
-                Train With Me <ArrowRight size={18} />
+              <a href={getSetting("train_with_me_link", "#contact")} className="btn-orange" style={{ fontSize: 16, padding: "16px 32px" }}>
+                <Dumbbell size={18} /> Train With Me <ArrowRight size={18} />
               </a>
-              <a href="#lead-magnet" className="btn-outline" style={{ fontSize: 16, padding: "15px 28px" }}>
-                <Gift size={18} /> Get Free Diet Plan
+              <a href="#transformations" className="btn-outline" style={{ fontSize: 16, padding: "15px 28px" }}>
+                <Trophy size={18} /> See Results
               </a>
             </motion.div>
           </motion.div>

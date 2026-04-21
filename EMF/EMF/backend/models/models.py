@@ -53,9 +53,9 @@ class ContactMessage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(255), nullable=False)
-    phone = Column(String(20), nullable=True)
-    message = Column(Text, nullable=False)
+    phone = Column(String(20), nullable=False)   # mandatory
+    email = Column(String(255), nullable=True)    # optional
+    message = Column(Text, nullable=True)         # optional
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 

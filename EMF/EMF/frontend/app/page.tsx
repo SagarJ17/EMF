@@ -24,18 +24,18 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <LeadMagnet />
+        {/* <LeadMagnet /> */}
         <About />
-        <WhyEMF />
         <Transformations />
-        <Services />
-        <BMICalculator />
-        <VideoSection />
-        <UrgencySection />
-        <BookSession />
-        <Reviews />
+        <WhyEMF />
+        {/* <Services /> */}
+        {/* <BMICalculator /> */}
+        {/* <VideoSection /> */}
+        {/* <UrgencySection /> */}
+        {/* <BookSession /> */}
+        {/* <Reviews /> */}
         <Contact />
-        <FinalCTA />
+        {/* <FinalCTA /> */}
       </main>
       <Footer />
       <WhatsAppButton />

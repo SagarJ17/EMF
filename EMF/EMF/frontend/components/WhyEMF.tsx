@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Home, Target, Clock, TrendingUp, Shield, Zap } from "lucide-react";
+import { Home, Target, Clock, TrendingUp, Shield, Zap, MapPin } from "lucide-react";
 
 const reasons = [
   {
@@ -11,33 +11,15 @@ const reasons = [
     color: "#e8450a",
   },
   {
-    icon: Target,
-    title: "100% Personalised",
-    desc: "Every plan is built around your body, your goal, and your schedule. Zero generic templates.",
-    color: "#f97316",
-  },
-  {
-    icon: Clock,
-    title: "Flexible Timing",
-    desc: "Morning, afternoon, or evening — we train around your busy life, not the other way around.",
-    color: "#e8450a",
-  },
-  {
-    icon: Shield,
-    title: "Real Accountability",
-    desc: "Weekly check-ins, form reviews via video, and daily WhatsApp support to keep you on track.",
-    color: "#f97316",
-  },
-  {
     icon: TrendingUp,
     title: "Faster Results",
     desc: "Focused 1-on-1 attention means better technique, smarter programming, and faster progress.",
     color: "#e8450a",
   },
   {
-    icon: Zap,
-    title: "Online Coaching",
-    desc: "Can't train in person? Get the same elite coaching experience fully online — anywhere, anytime.",
+    icon: MapPin,
+    title: "Train at Centre",
+    desc: "Prefer a professional setup? Train in a fully equipped fitness centre with expert guidance and zero distractions.",
     color: "#f97316",
   },
 ];

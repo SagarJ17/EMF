@@ -2,12 +2,12 @@
 
 export default function StickyMobileCTA() {
   const waUrl =
-    "https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness";
+    "https://wa.me/919819406259?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness";
 
   return (
     <div className="sticky-cta" id="sticky-mobile-cta">
       <a
-        href="#book"
+        href="#contact"
         id="sticky-book-btn"
         style={{
           flex: 1, display: "flex", alignItems: "center", justifyContent: "center",

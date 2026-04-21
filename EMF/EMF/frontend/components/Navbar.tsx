@@ -6,12 +6,12 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 
 const navLinks = [
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
+  { label: "Founder", href: "#about" },
   { label: "Results", href: "#transformations" },
-  { label: "BMI Check", href: "#bmi" },
-  { label: "Reviews", href: "#reviews" },
-  { label: "Contact", href: "#contact" },
+  { label: "About", href: "#why" },
+  // { label: "Services", href: "#services" },
+  // { label: "BMI Check", href: "#bmi" },
+  // { label: "Reviews", href: "#reviews" },
 ];
 
 export default function Navbar() {
@@ -30,29 +30,21 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/90 backdrop-blur-xl shadow-sm border-b border-black/5"
-            : "bg-transparent"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+          ? "bg-white/90 backdrop-blur-xl shadow-sm border-b border-black/5"
+          : "bg-transparent"
+          }`}
       >
         <div className="container" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 70 }}>
-            {/* Logo */}
-            <a href="#" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            {/* Logo only */}
+            <a href="#" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
               <div style={{
-                width: 40, height: 40, background: "white", borderRadius: 10,
-                position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center"
+                width: 44, height: 44, background: "white", borderRadius: 10,
+                position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               }}>
-                <Image src="/emflogo.png" alt="EMF Fitness" fill style={{ objectFit: "cover" }} sizes="40px" priority />
-              </div>
-              <div style={{ lineHeight: 1.15 }}>
-                <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 800, fontSize: 18, color: "#e8450a", letterSpacing: "-0.02em" }}>
-                  EMF
-                </div>
-                <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 600, fontSize: 12, color: "#3d3d3d", letterSpacing: "0.04em" }}>
-                  Fitness
-                </div>
+                <Image src="/emflogo.png" alt="EMF Fitness" fill style={{ objectFit: "cover" }} sizes="44px" priority />
               </div>
             </a>
 
@@ -73,7 +65,7 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <a href="#book" className="btn-orange" style={{ padding: "10px 22px", fontSize: 14 }}>
+              <a href="#contact" className="btn-orange" style={{ padding: "10px 22px", fontSize: 14 }}>
                 Book Free Session
               </a>
             </div>

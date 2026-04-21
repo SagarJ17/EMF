@@ -109,7 +109,7 @@ export default function UrgencySection() {
               Claim My Slot <ArrowRight size={18} />
             </a>
             <a
-              href="https://wa.me/919876543210?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness"
+              href="https://wa.me/919819406259?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness"
               target="_blank"
               rel="noopener noreferrer"
               style={{

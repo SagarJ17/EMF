@@ -26,7 +26,7 @@ async def create_booking(
         location=payload.location,
     )
     db.add(booking)
-    await db.flush()
+    await db.commit()
     await db.refresh(booking)
 
     return BookingResponse(
