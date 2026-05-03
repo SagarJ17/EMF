@@ -5,8 +5,12 @@ import { ArrowRight, Gift, Star, CheckCircle, Trophy, Dumbbell } from "lucide-re
 import Image from "next/image";
 import { useCMSStore } from "@/store/cmsStore";
 
+const SAMPLE_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4";
+const SAMPLE_VIDEO_POSTER = "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=750&fit=crop&crop=top";
+
 export default function Hero() {
   const { getSetting } = useCMSStore();
+  const videoUrl = getSetting("hero_video_url", SAMPLE_VIDEO_URL);
   return (
     <section
       id="hero"
@@ -177,7 +181,7 @@ export default function Hero() {
               }}
             />
 
-            {/* Main image */}
+            {/* Main video */}
             <div
               style={{
                 borderRadius: 28,
@@ -185,14 +189,24 @@ export default function Hero() {
                 position: "relative",
                 aspectRatio: "4/5",
                 boxShadow: "0 24px 64px rgba(0,0,0,0.12)",
+                background: "#111",
               }}
             >
-              <Image
-                src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=750&fit=crop&crop=top"
-                alt="EMF Fitness personal trainer"
-                fill
-                style={{ objectFit: "cover" }}
-                priority
+              <video
+                src={videoUrl}
+                poster={SAMPLE_VIDEO_POSTER}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                  opacity: 1,
+                }}
               />
               {/* Gradient overlay at bottom */}
               <div
