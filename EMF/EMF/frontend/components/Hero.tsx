@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Gift, Star, CheckCircle, Trophy, Dumbbell } from "lucide-react";
+import { ArrowRight, Gift, Star, CheckCircle, Trophy, BicepsFlexed } from "lucide-react";
 import Image from "next/image";
 import { useCMSStore } from "@/store/cmsStore";
 
@@ -155,7 +155,7 @@ export default function Hero() {
               style={{ display: "flex", gap: 14, flexWrap: "wrap" }}
             >
               <a href={getSetting("train_with_me_link", "#contact")} className="btn-orange" style={{ fontSize: 16, padding: "16px 32px" }}>
-                <Dumbbell size={18} /> Train With Me <ArrowRight size={18} />
+                <BicepsFlexed size={18} /> Train With Me <ArrowRight size={18} />
               </a>
               <a href="#transformations" className="btn-outline" style={{ fontSize: 16, padding: "15px 28px" }}>
                 <Trophy size={18} /> See Results
