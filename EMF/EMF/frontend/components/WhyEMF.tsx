@@ -3,28 +3,30 @@
 import { motion } from "framer-motion";
 import { Home, Target, Clock, TrendingUp, Shield, Zap, MapPin } from "lucide-react";
 
-const reasons = [
-  {
-    icon: Home,
-    title: "Train at Home",
-    desc: "No gym commute. No waiting for machines. Get a world-class workout delivered to your living room.",
-    color: "#e8450a",
-  },
-  {
-    icon: TrendingUp,
-    title: "Faster Results",
-    desc: "Focused 1-on-1 attention means better technique, smarter programming, and faster progress.",
-    color: "#e8450a",
-  },
-  {
-    icon: MapPin,
-    title: "Train at Centre",
-    desc: "Prefer a professional setup? Train in a fully equipped fitness centre with expert guidance and zero distractions.",
-    color: "#f97316",
-  },
-];
+import { useCMSStore } from "@/store/cmsStore";
 
 export default function WhyEMF() {
+  const { getSetting } = useCMSStore();
+  
+  const reasons = [
+    {
+      icon: Home,
+      title: "Train at Home",
+      desc: "No gym commute. No waiting for machines. Get a world-class workout delivered to your living room.",
+      color: "#e8450a",
+      linkTitle: "Watch Home Workouts",
+      linkHref: getSetting("social_youtube", "https://youtube.com"),
+    },
+    {
+      icon: MapPin,
+      title: "Train at Centre",
+      desc: "Prefer a professional setup? Train in a fully equipped fitness centre with expert guidance and zero distractions.",
+      color: "#f97316",
+      linkTitle: "See Our Centre",
+      linkHref: getSetting("social_instagram", "https://www.instagram.com/emf.fitness?igsh=MTVhZTFjN2o1N2xhbQ=="),
+    },
+  ];
+
   return (
     <section id="why" className="section" style={{ background: "white" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 24px" }}>
@@ -34,9 +36,9 @@ export default function WhyEMF() {
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: 60 }}
         >
-          <span className="section-badge">Why EMF Fitness</span>
+          <span className="section-badge">About EMF Fitness</span>
           <h2 className="section-title">
-            Why Clients Choose <span>EMF</span>
+            About <span>EMF Fitness</span>
           </h2>
           <p className="section-subtitle" style={{ margin: "0 auto" }}>
             We&apos;re not another generic personal training service. We obsess over your results.
@@ -82,7 +84,13 @@ export default function WhyEMF() {
               <h3 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 19, color: "#0f0f0f", marginBottom: 10 }}>
                 {reason.title}
               </h3>
-              <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7 }}>{reason.desc}</p>
+              <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7, flex: 1 }}>{reason.desc}</p>
+              
+              <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+                <a href={reason.linkHref} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: reason.color, textDecoration: "none" }}>
+                  {reason.linkTitle} →
+                </a>
+              </div>
             </motion.div>
           ))}
         </div>

@@ -17,7 +17,7 @@ export default function StickyMobileCTA() {
           boxShadow: "0 4px 16px rgba(232,69,10,0.3)",
         }}
       >
-        📅 Book Free Session
+        📅 Book Trial Session
       </a>
       <a
         href={waUrl}

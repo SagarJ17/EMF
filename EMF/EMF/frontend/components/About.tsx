@@ -10,7 +10,7 @@ export default function About() {
 
   const stats = [
     { icon: Users, value: getSetting("about_stat1_val", "200+"), label: getSetting("about_stat1_lbl", "Clients Transformed") },
-    { icon: Award, value: getSetting("about_stat2_val", "4+"), label: getSetting("about_stat2_lbl", "Years Experience") },
+    { icon: Award, value: getSetting("about_stat2_val", "10+"), label: getSetting("about_stat2_lbl", "Years Experience") },
     { icon: Clock, value: getSetting("about_stat3_val", "1000+"), label: getSetting("about_stat3_lbl", "Sessions Delivered") },
     { icon: Zap, value: getSetting("about_stat4_val", "100%"), label: getSetting("about_stat4_lbl", "Personalised Plans") },
   ];
@@ -105,7 +105,7 @@ export default function About() {
           >
             <span className="section-badge">About The Founder</span>
             <h2 className="section-title">
-              {getSetting("about_title", "Hi, I'm ")} <span>{getSetting("about_name", "Neeraj Bhadauria")}</span>
+              {getSetting("about_title", "Hi, I'm ")} <span>{getSetting("about_name", "Neeraj")}</span>
             </h2>
 
             {loading ? (
@@ -117,10 +117,10 @@ export default function About() {
             ) : (
               <>
                 <p style={{ fontSize: 16, color: "#6b7280", lineHeight: 1.8, marginBottom: 20 }}>
-                  {getSetting("about_p1", "With 4+ years of hands-on experience in personal training, I founded EMF Fitness with one mission: to make elite fitness coaching accessible, affordable, and results-driven — without needing a gym.")}
+                  {getSetting("about_p1", "Founder of EMF Fitness, I come from a background in Mechanical Engineering, but my passion for fitness led me to start training people and eventually build my own gym in Goregaon, Mumbai in 2018.")}
                 </p>
                 <p style={{ fontSize: 16, color: "#6b7280", lineHeight: 1.8, marginBottom: 32 }}>
-                  {getSetting("about_p2", "Every programme I build is 100% tailored to the individual — your body type, lifestyle, schedule, and goal. No cookie-cutter plans. No filler exercises. Just proven systems that deliver real results.")}
+                  {getSetting("about_p2", "Over the years, I’ve worked with people from all fitness level especially those struggling with fat loss, consistency, and motivation. My focus has always been on providing personalised training, proper guidance, and a supportive environment so that fitness becomes a sustainable lifestyle, not just a short-term transformation")}
                 </p>
               </>
             )}
@@ -149,7 +149,12 @@ export default function About() {
 
       <style>{`
         @media (max-width: 768px) {
-          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .stats-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
+          .stats-grid > div { padding: 12px 8px !important; border-radius: 12px !important; }
+          .stats-grid > div > div:first-child { width: 32px !important; height: 32px !important; margin-bottom: 8px !important; border-radius: 8px !important; }
+          .stats-grid > div > div:first-child svg { width: 16px !important; height: 16px !important; }
+          .stats-grid > div > div:nth-child(2) { font-size: 16px !important; margin-bottom: 2px !important; }
+          .stats-grid > div > div:last-child { font-size: 9px !important; line-height: 1.2 !important; }
           .about-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
         }
       `}</style>

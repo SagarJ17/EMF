@@ -20,17 +20,13 @@ export default function Footer() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
               <div style={{
-                width: 40, height: 40,
-                background: "white", borderRadius: 10, display: "flex",
+                width: 100, height: 100,
+                // background: "white",
+                borderRadius: 10, display: "flex",
                 alignItems: "center", justifyContent: "center", position: "relative",
-                overflow: "hidden"
+                // overflow: "hidden"
               }}>
-                <Image src="/emflogo.png" alt="EMF Fitness" fill style={{ objectFit: "cover" }} sizes="40px" />
-              </div>
-              <div style={{ lineHeight: 1.15 }}>
-                <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 800, fontSize: 18, color: "#e8450a", letterSpacing: "-0.02em" }}>
-                  EMF <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>Fitness</span>
-                </div>
+                <Image src="/emflogo-Photoroom.png" alt="EMF Fitness" width={100} height={100} style={{ objectFit: "contain" }} />
               </div>
             </div>
             <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7, maxWidth: 260, marginBottom: 20 }}>
@@ -42,7 +38,7 @@ export default function Footer() {
           <div style={{ marginLeft: "auto" }} className="socials-col">
             <h5 style={{ fontFamily: "Outfit", fontWeight: 700, color: "white", fontSize: 14, marginBottom: 16, letterSpacing: "0.04em" }}>SOCIALS</h5>
             <div style={{ display: "flex", gap: 12 }}>
-              <a href={getSetting("social_instagram", "https://instagram.com")} target="_blank" aria-label="Instagram" style={{
+              <a href={getSetting("social_instagram", "https://www.instagram.com/emf.fitness?igsh=MTVhZTFjN2o1N2xhbQ==")} target="_blank" aria-label="Instagram" style={{
                 width: 38, height: 38, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", transition: "all 0.2s", color: "#6b7280", textDecoration: "none"

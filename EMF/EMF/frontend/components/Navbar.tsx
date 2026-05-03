@@ -40,11 +40,24 @@ export default function Navbar() {
             {/* Logo only */}
             <a href="#" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
               <div style={{
-                width: 44, height: 44, background: "white", borderRadius: 10,
-                position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                width: 100, // increased size (adjust as needed)
+                height: 100,
+                // background: "white",
+                borderRadius: 10,
+                position: "relative",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                // boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               }}>
-                <Image src="/emflogo.png" alt="EMF Fitness" fill style={{ objectFit: "cover" }} sizes="44px" priority />
+                <Image
+                  src="/emflogo-Photoroom.png"
+                  alt="EMF Fitness"
+                  width={100}
+                  height={100}
+                  style={{ objectFit: "contain" }}
+                />
               </div>
             </a>
 
@@ -66,7 +79,7 @@ export default function Navbar() {
                 </a>
               ))}
               <a href="#contact" className="btn-orange" style={{ padding: "10px 22px", fontSize: 14 }}>
-                Book Free Session
+                Book Trial Session
               </a>
             </div>
 
@@ -122,7 +135,7 @@ export default function Navbar() {
               className="btn-orange"
               style={{ marginTop: 16, width: "100%", display: "flex" }}
             >
-              Book Free Session
+              Book Trial Session
             </a>
           </motion.div>
         )}

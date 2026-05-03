@@ -75,103 +75,6 @@ export default function Contact() {
           style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 48, alignItems: "start" }}
           className="contact-grid"
         >
-          {/* Info cards */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            style={{ display: "flex", flexDirection: "column", gap: 20 }}
-          >
-            {[
-              {
-                icon: Phone,
-                label: "Call",
-                value: "+91 9819406259",
-                href: "tel:+919819406259",
-              },
-              {
-                icon: MessageCircle,
-                label: "WhatsApp",
-                value: "Chat now for instant reply",
-                href: "https://wa.me/919819406259?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness",
-              },
-            ].map(({ icon: Icon, label, value, href }) => (
-              <a
-                key={label}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel="noopener noreferrer"
-                style={{ textDecoration: "none" }}
-              >
-                <div
-                  className="card"
-                  style={{ padding: "20px 24px", display: "flex", gap: 16, alignItems: "center", transition: "all 0.2s" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#e8450a"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.08)"; }}
-                >
-                  <div style={{
-                    width: 48, height: 48, background: "rgba(232,69,10,0.1)",
-                    borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                  }}>
-                    <Icon size={20} color="#e8450a" />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, color: "#9ca3af", fontWeight: 600, marginBottom: 2 }}>{label}</div>
-                    <div style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 15, color: "#0f0f0f" }}>{value}</div>
-                  </div>
-                </div>
-              </a>
-            ))}
-
-            <div
-              className="card"
-              style={{
-                padding: "20px 24px",
-                background: "rgba(232,69,10,0.04)",
-                borderColor: "rgba(232,69,10,0.15)",
-              }}
-            >
-              <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7 }}>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <span>📍</span>
-                  <div>
-                    <strong style={{ color: "#0f0f0f" }}>Operating Hours:</strong>
-                    <div><strong style={{ color: "#0f0f0f" }}>Mon – Fri:</strong> 6 AM – 8:30 PM</div>
-                    <div><strong style={{ color: "#0f0f0f" }}>Saturday:</strong> 7 AM – 6:30 PM</div>
-                  </div>
-                </div>
-                <div style={{ marginTop: 8 }}>
-                  Home training available across Mumbai. Train at a professional fitness centre.
-                </div>
-              </div>
-            </div>
-
-            {/* Centre Address Box */}
-            <div
-              className="card"
-              style={{
-                padding: "20px 24px",
-                background: "rgba(34,197,94,0.04)",
-                borderColor: "rgba(34,197,94,0.15)",
-                marginTop: -8,
-              }}
-            >
-              <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7 }}>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <span>🏢</span>
-                  <div>
-                    <strong style={{ color: "#0f0f0f" }}>Centre Address:</strong>
-                    <div style={{ marginTop: 4 }}>
-                      Shop no. 1,2,3, Gulmohar CHS,LTD. <br /> 
-                      Sitaram Patkar Rd, Piramal Nagar <br />
-                      Goregaon West, Mumbai, MH-400104.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
           {/* Form */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
@@ -270,6 +173,98 @@ export default function Contact() {
                   </button>
                 </form>
               )}
+            </div>
+          </motion.div>
+
+          {/* Info cards */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            style={{ display: "flex", flexDirection: "column", gap: 20 }}
+          >
+            {[
+              {
+                icon: Phone,
+                label: "Call",
+                value: "+91 9819406259",
+                href: "tel:+919819406259",
+              },
+              {
+                icon: MessageCircle,
+                label: "WhatsApp",
+                value: "Chat now for instant reply",
+                href: "https://wa.me/919819406259?text=Hi%2C%20I%20want%20to%20start%20personal%20training%20with%20EMF%20Fitness",
+              },
+            ].map(({ icon: Icon, label, value, href }) => (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                style={{ textDecoration: "none" }}
+              >
+                <div
+                  className="card"
+                  style={{ padding: "20px 24px", display: "flex", gap: 16, alignItems: "center", transition: "all 0.2s" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#e8450a"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.08)"; }}
+                >
+                  <div style={{
+                    width: 48, height: 48, background: "rgba(232,69,10,0.1)",
+                    borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <Icon size={20} color="#e8450a" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#9ca3af", fontWeight: 600, marginBottom: 2 }}>{label}</div>
+                    <div style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 15, color: "#0f0f0f" }}>{value}</div>
+                  </div>
+                </div>
+              </a>
+            ))}
+
+            <div
+              className="card"
+              style={{
+                padding: "20px 24px",
+                background: "rgba(232,69,10,0.04)",
+                borderColor: "rgba(232,69,10,0.15)",
+              }}
+            >
+              <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <span>📍</span>
+                  <div>
+                    Home training available across Mumbai. Train at a professional fitness centre.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Centre Address Box */}
+            <div
+              className="card"
+              style={{
+                padding: "20px 24px",
+                background: "rgba(34,197,94,0.04)",
+                borderColor: "rgba(34,197,94,0.15)",
+                marginTop: -8,
+              }}
+            >
+              <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.7 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <span>🏢</span>
+                  <div>
+                    <strong style={{ color: "#0f0f0f" }}>Centre Address:</strong>
+                    <div style={{ marginTop: 4 }}>
+                      Shop no. 1,2,3, Gulmohar CHS,LTD. <br /> 
+                      Sitaram Patkar Rd, Piramal Nagar <br />
+                      Goregaon West, Mumbai, MH-400104.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>

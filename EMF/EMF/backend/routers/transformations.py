@@ -43,6 +43,21 @@ async def create_transformation(data: TransformationCreate, db: AsyncSession = D
     await db.refresh(db_item)
     return db_item
 
+@router.put("/{id}", response_model=TransformationResponse)
+async def update_transformation(id: int, data: TransformationCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Transformation).where(Transformation.id == id))
+    item = result.scalar_one_or_none()
+    if item is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    for key, value in data.model_dump().items():
+        setattr(item, key, value)
+        
+    await db.commit()
+    await db.refresh(item)
+    return item
+
 @router.delete("/{id}")
 async def delete_transformation(id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Transformation).where(Transformation.id == id))

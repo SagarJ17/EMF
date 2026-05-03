@@ -29,6 +29,7 @@ services:
       - ALLOWED_ORIGINS=["http://localhost:3000"]
       - SECRET_KEY=emf-fitness-secret-key-change-in-production
       - WHATSAPP_NUMBER=+919819406259
+      - WATCHFILES_FORCE_POLLING=true
     ports:
       - "8000:8000"
     volumes:
@@ -46,6 +47,8 @@ services:
     command: sh -c "npm install && npm run dev"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     ports:
       - "3000:3000"
     volumes:

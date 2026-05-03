@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     <div style={{ background: "#f3f4f6", minHeight: "100vh", paddingBottom: 60 }}>
       {/* Header */}
       <div style={{ background: "white", padding: "0 24px", borderBottom: "1px solid #e5e7eb", position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", height: 64 }}>
+        <div className="admin-header-wrap" style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 64 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 36, height: 36, background: "#fff5f0", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontFamily: "Outfit", fontWeight: 900, fontSize: 14, color: "#e8450a" }}>EMF</span>
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
               Admin <span style={{ color: "#e8450a" }}>CMS</span>
             </h1>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="admin-nav-tabs" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
             {[
               { key: "transformations", icon: <ImageIcon size={14} />, label: "Transformations" },
               { key: "settings", icon: <SettingsIcon size={14} />, label: "Site Settings" },
@@ -83,7 +83,27 @@ export default function AdminDashboard() {
 
       <style>{`
         .admin-grid { display: grid; gap: 32px; grid-template-columns: 1fr 2fr; }
-        @media (max-width: 900px) { .admin-grid { grid-template-columns: 1fr; } }
+        .transform-row { display: flex; padding: 16px; border: 1px solid #f3f4f6; margin-bottom: 12px; border-radius: 12px; align-items: center; gap: 16px; }
+        
+        @media (max-width: 900px) { 
+          .admin-grid { grid-template-columns: 1fr; } 
+          .settings-layout { grid-template-columns: 1fr !important; }
+          .editor-panel { position: relative !important; top: 0 !important; max-height: none !important; margin-bottom: 32px; }
+          .editor-scroll-area { overflow-y: visible !important; }
+        }
+        @media (max-width: 650px) {
+          .admin-header-wrap { flex-direction: column; align-items: flex-start !important; padding: 16px 0; gap: 12px; }
+          .admin-nav-tabs { width: 100%; padding-bottom: 8px; }
+          .admin-nav-tabs button { flex: 1; justify-content: center; white-space: nowrap; }
+          .transform-row { flex-direction: column; align-items: flex-start !important; }
+          .transform-actions { width: 100%; justify-content: flex-end; border-top: 1px solid #eee; padding-top: 12px; margin-top: 8px; }
+          .sandbox-hero-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .sandbox-about-stats { grid-template-columns: repeat(2, 1fr) !important; }
+          .sandbox-about-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .report-card { padding: 20px !important; }
+          .report-table-actions { flex-direction: column; width: 100%; align-items: stretch !important; }
+          .report-table-actions input, .report-table-actions button { width: 100%; min-width: 0 !important; }
+        }
       `}</style>
     </div>
   );
@@ -97,6 +117,8 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [type, setType] = useState<"image" | "video">("image");
+  
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [result, setResult] = useState("");
   const [quote, setQuote] = useState("");
@@ -120,26 +142,56 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
   const submit = async (e: any) => {
     e.preventDefault();
     if (!name) return alert("Client Name is required.");
-    if (type === "image" && (!beforeFile || !afterFile)) return alert("Both Before and After photos are required.");
-    if (type === "video" && videoSource === "upload" && !videoFile) return alert("A video file is required.");
+    if (!editingId && type === "image" && (!beforeFile || !afterFile)) return alert("Both Before and After photos are required.");
+    if (!editingId && type === "video" && videoSource === "upload" && !videoFile) return alert("A video file is required.");
     if (type === "video" && videoSource === "youtube" && !youtubeURL) return alert("A YouTube link is required.");
 
     setSaving(true);
     try {
       let payload: any = { name, result, quote };
       if (type === "image") {
-        payload.before_image = await uploadFile(beforeFile!, "transformations");
-        payload.after_image = await uploadFile(afterFile!, "transformations");
+        if (beforeFile) payload.before_image = await uploadFile(beforeFile, "transformations");
+        else if (editingId) payload.before_image = items.find(i => i.id === editingId)?.before_image;
+        
+        if (afterFile) payload.after_image = await uploadFile(afterFile, "transformations");
+        else if (editingId) payload.after_image = items.find(i => i.id === editingId)?.after_image;
       } else {
-        payload.video = videoSource === "upload" ? await uploadFile(videoFile!, "transformations") : youtubeURL;
+        if (videoSource === "upload" && videoFile) payload.video = await uploadFile(videoFile, "transformations");
+        else if (videoSource === "youtube") payload.video = youtubeURL;
+        else if (editingId) payload.video = items.find(i => i.id === editingId)?.video;
       }
-      await fetch(`${apiUrl}/transformations`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+      
+      const method = editingId ? "PUT" : "POST";
+      const url = editingId ? `${apiUrl}/transformations/${editingId}` : `${apiUrl}/transformations`;
+      
+      await fetch(url, {
+        method: method, headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      setName(""); setResult(""); setQuote(""); setBeforeFile(null); setAfterFile(null); setVideoFile(null);
+      cancelEdit();
       fetchItems();
     } finally { setSaving(false); }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setName(""); setResult(""); setQuote(""); setBeforeFile(null); setAfterFile(null); setVideoFile(null); setYoutubeURL("");
+  };
+
+  const startEdit = (t: any) => {
+    setEditingId(t.id);
+    setName(t.name);
+    setResult(t.result);
+    setQuote(t.quote || "");
+    if (t.video) {
+      setType("video");
+      const isYt = t.video.includes("youtube.com") || t.video.includes("youtu.be");
+      setVideoSource(isYt ? "youtube" : "upload");
+      if (isYt) setYoutubeURL(t.video);
+    } else {
+      setType("image");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -147,7 +199,7 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
       {/* Form */}
       <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)", height: "fit-content" }}>
         <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, borderBottom: "1px solid #eee", paddingBottom: 16 }}>
-          Add Transformation
+          {editingId ? "Edit Transformation" : "Add Transformation"}
         </h2>
 
         <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
@@ -205,9 +257,14 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
               )}
             </div>
 
-          <button disabled={saving} className="btn-orange" style={{ padding: "12px", display: "flex", justifyContent: "center", gap: 8 }}>
-            {saving ? <><Loader2 size={18} className="animate-spin" /> Uploading...</> : <><Upload size={16} /> Save to Database</>}
-          </button>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button disabled={saving} className="btn-orange" style={{ flex: 1, padding: "12px", display: "flex", justifyContent: "center", gap: 8 }}>
+              {saving ? <><Loader2 size={18} className="animate-spin" /> {editingId ? "Updating..." : "Uploading..."}</> : <><Upload size={16} /> {editingId ? "Update Transformation" : "Save to Database"}</>}
+            </button>
+            {editingId && (
+              <button type="button" onClick={cancelEdit} className="btn-outline" style={{ padding: "12px 24px" }}>Cancel</button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -224,7 +281,7 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
             <p style={{ fontSize: 14 }}>No transformations yet. Add the first one!</p>
           </div>
         ) : items.map(t => (
-          <div key={t.id} style={{ display: "flex", padding: 16, border: "1px solid #f3f4f6", marginBottom: 12, borderRadius: 12, alignItems: "center", gap: 16 }}>
+          <div key={t.id} className="transform-row">
             {t.video ? (
               <div style={{ width: 52, height: 52, background: "#111", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Play size={18} color="white" />
@@ -241,12 +298,20 @@ function TransformationsTab({ apiUrl }: { apiUrl: string }) {
             <span style={{ fontSize: 11, background: t.video ? "#eff6ff" : "#fff5f0", color: t.video ? "#3b82f6" : "#e8450a", padding: "3px 10px", borderRadius: 100, fontWeight: 700, flexShrink: 0 }}>
               {t.video ? "VIDEO" : "PHOTOS"}
             </span>
-            <button
-              onClick={async () => { if (confirm("Delete this entry?")) { await fetch(`${apiUrl}/transformations/${t.id}`, { method: "DELETE" }); fetchItems(); } }}
-              style={{ background: "#fee2e2", border: "none", color: "#ef4444", padding: 10, borderRadius: 8, cursor: "pointer", display: "flex", flexShrink: 0 }}
-            >
-              <Trash2 size={16} />
-            </button>
+            <div className="transform-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+              <button
+                onClick={() => startEdit(t)}
+                style={{ background: "#f3f4f6", border: "none", color: "#374151", padding: 10, borderRadius: 8, cursor: "pointer", display: "flex" }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 600 }}>Edit</span>
+              </button>
+              <button
+                onClick={async () => { if (confirm("Delete this entry?")) { await fetch(`${apiUrl}/transformations/${t.id}`, { method: "DELETE" }); fetchItems(); } }}
+                style={{ background: "#fee2e2", border: "none", color: "#ef4444", padding: 10, borderRadius: 8, cursor: "pointer", display: "flex" }}
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -319,14 +384,14 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "420px 1fr", gap: 24, alignItems: "start", minHeight: "calc(100vh - 120px)" }} className="settings-layout">
       {/* ── LEFT: Editor ─────────────────────────────────── */}
-      <div style={{ background: "white", borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)", overflow: "hidden", position: "sticky", top: 80, maxHeight: "calc(100vh - 110px)", display: "flex", flexDirection: "column" }}>
+      <div className="editor-panel" style={{ background: "white", borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)", overflow: "hidden", position: "sticky", top: 80, maxHeight: "calc(100vh - 110px)", display: "flex", flexDirection: "column" }}>
         <div style={{ padding: "20px 24px", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <SettingsIcon size={18} color="#e8450a" />
           <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 18, margin: 0 }}>Page Editor</h2>
           <span style={{ marginLeft: "auto", fontSize: 11, color: "#9ca3af" }}>Edits reflect in sandbox →</span>
         </div>
 
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 24px 24px" }}>
+        <div className="editor-scroll-area" style={{ overflowY: "auto", flex: 1, padding: "0 24px 24px" }}>
           <form onSubmit={save}>
 
             {/* ── Hero Section ─────────────────────────── */}
@@ -353,12 +418,12 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
             {/* ── About Section ────────────────────────── */}
             <SectionHeader emoji="👤" label="About Founder" />
             <Field label="Title Prefix (e.g. 'Hi, I'm')" value={g("about_title", "Hi, I'm")} onChange={v => update("about_title", v)} />
-            <Field label="Founder Name" value={g("about_name", "Neeraj Bhadauria")} onChange={v => update("about_name", v)} />
+            <Field label="Founder Name" value={g("about_name", "Neeraj")} onChange={v => update("about_name", v)} />
             <Field label="Paragraph 1" value={g("about_p1", "")} onChange={v => update("about_p1", v)} rows={3} />
             <Field label="Paragraph 2" value={g("about_p2", "")} onChange={v => update("about_p2", v)} rows={3} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               <StatField valKey="about_stat1_val" lblKey="about_stat1_lbl" valDef="200+" lblDef="Clients Transformed" settings={settings} update={update} />
-              <StatField valKey="about_stat2_val" lblKey="about_stat2_lbl" valDef="4+" lblDef="Years Experience" settings={settings} update={update} />
+              <StatField valKey="about_stat2_val" lblKey="about_stat2_lbl" valDef="10+" lblDef="Years Experience" settings={settings} update={update} />
               <StatField valKey="about_stat3_val" lblKey="about_stat3_lbl" valDef="1000+" lblDef="Sessions Delivered" settings={settings} update={update} />
               <StatField valKey="about_stat4_val" lblKey="about_stat4_lbl" valDef="100%" lblDef="Personalised Plans" settings={settings} update={update} />
             </div>
@@ -375,14 +440,6 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
             <Field label="Instagram URL" value={g("social_instagram", "https://instagram.com")} onChange={v => update("social_instagram", v)} />
             <Field label="YouTube URL" value={g("social_youtube", "https://youtube.com")} onChange={v => update("social_youtube", v)} />
             <Field label="Footer Description" value={g("footer_blurb", "Experience high-end personal training crafted around you.")} onChange={v => update("footer_blurb", v)} rows={2} />
-
-            {/* ── Lead Magnet PDF ───────────────────────── */}
-            <SectionHeader emoji="📄" label="Free Diet Plan PDF" />
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Upload PDF</label>
-              <input type="file" accept="application/pdf" onChange={e => setPdfFile(e.target.files?.[0] || null)} style={{ fontSize: 12, width: "100%", padding: 8, background: "#f9fafb", borderRadius: 8, border: "1px solid #e5e7eb", cursor: "pointer" }} />
-              {settings.diet_pdf_url && <p style={{ fontSize: 10, color: "#9ca3af", marginTop: 4, wordBreak: "break-all" }}>Current: {settings.diet_pdf_url}</p>}
-            </div>
 
             <button
               type="submit"
@@ -422,14 +479,14 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
             <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
               {["Founder", "Results", "About"].map(l => <span key={l} style={{ fontSize: 11, color: "#3d3d3d", fontWeight: 600 }}>{l}</span>)}
               <span style={{ background: "#e8450a", color: "white", fontSize: 11, padding: "5px 12px", borderRadius: 8, fontWeight: 700 }}>
-                {g("cta_button_label", "Book Session")}
+                {g("cta_button_label", "Book Trial Session")}
               </span>
             </div>
           </div>
 
           {/* HERO preview */}
           <div style={{ background: "linear-gradient(160deg, #fff 0%, #fff8f5 50%, #fff 100%)", padding: "40px 24px 32px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "center" }}>
+            <div className="sandbox-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "center" }}>
               <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(232,69,10,0.1)", color: "#e8450a", fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 100, border: "1px solid rgba(232,69,10,0.2)", marginBottom: 12 }}>
                   ⭐ {g("hero_badge", "Rated 5.0 by 200+ Clients")}
@@ -478,7 +535,7 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
                    <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600 }}>{g("hero_float1_label", "Lives Transformed")}</div>
                  </div>
                  <div style={{ position: "absolute", bottom: 40, left: -10, background: "white", padding: "6px 8px", borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-                   <div style={{ fontSize: 12, fontWeight: 800, color: "#e8450a", lineHeight: 1 }}>{g("hero_float2_num", "4 yrs")}</div>
+                   <div style={{ fontSize: 12, fontWeight: 800, color: "#e8450a", lineHeight: 1 }}>{g("hero_float2_num", "10 Years")}</div>
                    <div style={{ fontSize: 7, color: "#6b7280", fontWeight: 600 }}>{g("hero_float2_label", "Training Experience")}</div>
                  </div>
                  
@@ -488,10 +545,10 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
 
           {/* ABOUT preview */}
           <div style={{ padding: "28px 24px", background: "#f9f9f9", borderTop: "1px solid rgba(0,0,0,0.04)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
+            <div className="sandbox-about-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
               {[
                 { v: g("about_stat1_val", "200+"), l: g("about_stat1_lbl", "Clients Transformed") },
-                { v: g("about_stat2_val", "4+"), l: g("about_stat2_lbl", "Years Experience") },
+                { v: g("about_stat2_val", "10+"), l: g("about_stat2_lbl", "Years Experience") },
                 { v: g("about_stat3_val", "1000+"), l: g("about_stat3_lbl", "Sessions Delivered") },
                 { v: g("about_stat4_val", "100%"), l: g("about_stat4_lbl", "Personalised Plans") },
               ].map((s, i) => (
@@ -501,7 +558,7 @@ function SettingsTab({ apiUrl }: { apiUrl: string }) {
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, alignItems: "center" }}>
+            <div className="sandbox-about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, alignItems: "center" }}>
               <div style={{ borderRadius: 14, aspectRatio: "3/4", background: "linear-gradient(135deg, #d1d5db, #e5e7eb)", position: "relative", overflow: "hidden" }}>
                  {(aboutImageFile || settings.about_image_url) ? (
                    <img src={aboutImageFile ? URL.createObjectURL(aboutImageFile) : settings.about_image_url} alt="Founder" style={{ objectFit: "cover", width: "100%", height: "100%" }} />
@@ -628,12 +685,12 @@ function ReportsTab({ apiUrl }: { apiUrl: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
       {/* ── DOT GRAPH ── */}
-      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
+      <div className="report-card" style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
         <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, marginBottom: 24, borderBottom: "1px solid #eee", paddingBottom: 16 }}>
           Conversion Trends (Last 30 Days)
         </h2>
-        <div style={{ width: "100%", height: 300 }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div style={{ width: "100%", height: 300, minWidth: 0, minHeight: 0 }}>
+          <ResponsiveContainer width="99%" height="100%">
             <AreaChart data={data.chart} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
@@ -651,12 +708,12 @@ function ReportsTab({ apiUrl }: { apiUrl: string }) {
       </div>
 
       {/* ── DATATABLE ── */}
-      <div style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
+      <div className="report-card" style={{ background: "white", padding: 32, borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #eee", flexWrap: "wrap", gap: 16 }}>
           <h2 style={{ fontFamily: "Outfit", fontWeight: 700, fontSize: 20, margin: 0 }}>
             Incoming Contacts
           </h2>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div className="report-table-actions" style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <input 
               placeholder="Search leads..." 
               value={search}

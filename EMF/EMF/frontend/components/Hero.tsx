@@ -289,7 +289,7 @@ export default function Hero() {
                 minWidth: 140,
               }}
             >
-              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: "Outfit", color: "#e8450a" }}>4 yrs</div>
+              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: "Outfit", color: "#e8450a" }}>10 Years</div>
               <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 500 }}>Training Experience</div>
             </motion.div>
           </motion.div>

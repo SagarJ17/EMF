@@ -383,7 +383,7 @@ img, video {
   .sticky-cta { display: flex; }
 
   /* WhatsApp */
-  .whatsapp-float { bottom: 88px; right: 16px; width: 52px; height: 52px; }
+  .whatsapp-float { display: none !important; }
 
   /* Buttons — full width on mobile */
   .btn-orange, .btn-outline {
