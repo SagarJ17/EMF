@@ -56,7 +56,8 @@ const nextConfig: NextConfig = {
       aggregateTimeout: 300,
     };
     return config;
-  }
+  },
+  turbopack: {}
 };
 
 export default nextConfig;
